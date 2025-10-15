@@ -36,6 +36,8 @@ def find_subsequence(input_ids, pattern):
 
 def get_dataloader(dataset, batch_size, shuffle = True):
     def collate_fn(batch):
+        print(batch)
+        exit()
         return {
             key: torch.stack([item[key] for item in batch], dim = 0)
             for key in batch[0]
