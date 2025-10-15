@@ -276,11 +276,6 @@ class ModelUtils:
             pred = ModelUtils.get_sentences_from_ids(self.processor, pred, to_numpy = True).reshape(-1, n_returns)
             label = ModelUtils.get_sentences_from_ids(self.processor, label, to_numpy = True)
             
-            print(label)
-            print()
-            print(pred)
-            exit()
-            
             self.outputs["questions"].append(quest)
             self.outputs["predictions"].append(pred)
             self.outputs["labels"].append(label)
