@@ -283,7 +283,7 @@ class CausalDataset(BaseDataset):
                 truncation = True,
                 max_length = 60,
                 return_tensors = "pt"
-            )
+            ).input_ids
             return inp
         
         merge_text = self.processor.apply_chat_template(merge_mes, tokenize = False, add_generation_prompt = False)
