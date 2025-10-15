@@ -1,0 +1,14 @@
+data
+*.ipynb_checkpoints*
+*.DS_Store*
+checkpoint*
+save_*
+*.ipynb
+*__pycache__*
+slurm*
+results*
+*_temp*
+*_config.json
+!example_config.json
+predictions_1.json
+test_results.joblib
