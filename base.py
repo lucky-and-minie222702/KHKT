@@ -277,7 +277,7 @@ class CausalDataset(BaseDataset):
                 max_length = self.max_length,
                 return_tensors = "pt"
             )
-            inp["label"] = self.processor.tokenizer(
+            inp["labels"] = self.processor.tokenizer(
                 text = self.ans,
                 padding = "max_length",
                 truncation = True,
