@@ -39,7 +39,7 @@ class ModelInterface:
         
     def prepare_for_lora_training(self):
         if self.setting == "qwen":
-            for p in self.model.merger.parameters():
+            for p in self.model.model.merger.parameters():
                 p.requires_grad = True
         
     def to_lora(self, **kwargs):
