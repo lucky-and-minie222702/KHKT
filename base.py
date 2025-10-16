@@ -221,17 +221,17 @@ class CausalDataset(BaseDataset):
         processor, 
         mode,  
         img_size, 
-        max_full_length,
-        max_user_length,
-        max_assistant_length,
+        full_max_length,
+        user_max_length,
+        assistant_max_length,
         setting = None,
         contain_label = True,
         transform = None
     ):
         super().__init__(df, processor, mode, img_size, setting, contain_label, transform)
-        self.max_full_length = max_full_length
-        self.max_user_length = max_user_length
-        self.max_assistant_length = max_assistant_length
+        self.full_max_length = full_max_length
+        self.user_max_length = user_max_length
+        self.assistant_max_length = assistant_max_length
     
     def process(self):
         super().process()
@@ -286,14 +286,14 @@ class CausalDataset(BaseDataset):
                 images = self.img,
                 padding = "max_length",
                 truncation = True,
-                max_length = self.max_user_length,
+                max_length = self.user_max_length,
                 return_tensors = "pt"
             )
             inp["labels"] = self.processor.tokenizer(
                 text = self.ans,
                 padding = "max_length",
                 truncation = True,
-                max_length = self.max_assistant_length,
+                max_length = self.assistant_max_length,
                 return_tensors = "pt"
             ).input_ids
             inp = {k: v.squeeze(0) for k, v in inp.items()}
@@ -306,7 +306,7 @@ class CausalDataset(BaseDataset):
             images = self.img,
             padding = "max_length",
             truncation = True,
-            max_length = self.max_full_length,
+            max_length = self.full_max_length,
             return_tensors = "pt"
         )
         merge = {k: v.squeeze(0) for k, v in merge.items()}
@@ -333,14 +333,14 @@ class Seq2seqDataset(BaseDataset):
         processor, 
         mode,  
         img_size, 
-        q_max_length,
-        a_max_length,
+        input_max_length,
+        label_max_length,
         contain_label = True,
         transform = None
     ):
         super().__init__(df, processor, mode, img_size, contain_label, transform)
-        self.q_max_length = q_max_length
-        self.a_max_length = a_max_length
+        self.input_max_length = input_max_length
+        self.label_max_length = label_max_length
 
     def process(self):
         super().process()
@@ -350,7 +350,7 @@ class Seq2seqDataset(BaseDataset):
         inp = self.processor(
             text = self.quest,
             images = self.img,
-            max_length = self.q_max_length,
+            max_length = self.input_max_length,
             padding = "max_length",
             truncation = True,
         )
@@ -358,7 +358,7 @@ class Seq2seqDataset(BaseDataset):
         if self.contain_label:
             label = self.processor.tokenizer(
                 text = self.ans,
-                max_length = self.a_max_length,
+                max_length = self.label_max_length,
                 padding = "max_length",
                 truncation = True,
             )["input_ids"]
