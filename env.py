@@ -88,7 +88,7 @@ class TrainingEnvironment:
             self.model_interface.to_lora(**lora_args)
             
             if logs_output_file is None:
-                logs_output_file = path.join(self.training_arguments.output_dir, logs_output_file)
+                logs_output_file = path.join(self.training_arguments.output_dir, "logs.json")
             
             self.trainer = Trainer(
                 model = self.model_interface.model,
