@@ -96,6 +96,7 @@ class TrainingEnvironment:
                     ModelUtils.TrainerSaveLossCallback(self.training_arguments.output_dir),
                 ],
             )
+            print(f"GPUS: {self.trainer.args.n_gpu}")
             
             self.trainer.train()
         
