@@ -2,6 +2,7 @@ from base import *
 from transformers import Trainer, TrainingArguments
 from transformers import TrainerCallback
 from tqdm import tqdm
+from os import path
 
 class TrainingEnvironment:
     def __init__(
@@ -86,6 +87,9 @@ class TrainingEnvironment:
             
             self.model_interface.to_lora(**lora_args)
             
+            if logs_output_file is None:
+                logs_output_file = path.join(self.training_arguments.output_dir, logs_output_file)
+            
             self.trainer = Trainer(
                 model = self.model_interface.model,
                 args = self.training_arguments,
@@ -95,7 +99,7 @@ class TrainingEnvironment:
                 eval_dataset = val_ds,
                 
                 callbacks = [
-                    ModelUtils.SaveLogsCallback(self.training_arguments.output_dir, logs_output_file),
+                    ModelUtils.SaveLogsCallback(logs_output_file),
                 ],
             )
             print(f"GPUS: {self.trainer.args.n_gpu}")
@@ -137,4 +141,6 @@ class TrainingEnvironment:
             )
             res["loss"] = self.model_interface.get_loss(test_dl)
             
+            if test_output_file is None:
+                test_output_file = path.join(self.training_arguments.output_dir, "test.results")
             joblib.dump(res, f"{test_output_file}")
