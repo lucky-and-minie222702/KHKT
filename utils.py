@@ -204,7 +204,7 @@ class ModelUtils:
         def on_log(self, args, state, control, logs = None, **kwargs):
             if logs is not None:
                 if "loss" in logs:
-                    self.loss_data["train"].append({"step": state.global_step, "loss": logs["loss"], "grad_norm": logs["grad_norm"], "learning_rate": logs["learing_rate"]})
+                    self.loss_data["train"].append({"step": state.global_step, "loss": logs["loss"], "grad_norm": logs["grad_norm"], "learning_rate": logs["learning_rate"]})
                 if "eval_loss" in logs:
                     self.loss_data["eval"].append({"step": state.global_step, "eval_loss": logs["eval_loss"]})
 
