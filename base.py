@@ -29,7 +29,7 @@ class ModelInterface:
         self.model = self.model_class.from_pretrained(
             pretrained_name,
             dtype = torch.bfloat16,
-            device_map = "auto",
+            # device_map = "auto",
             trust_remote_code = True
         )
         for name, param in self.model.named_parameters():
