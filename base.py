@@ -221,13 +221,17 @@ class CausalDataset(BaseDataset):
         processor, 
         mode,  
         img_size, 
-        max_length,
+        max_full_length,
+        max_user_length,
+        max_assistant_length,
         setting = None,
         contain_label = True,
         transform = None
     ):
         super().__init__(df, processor, mode, img_size, setting, contain_label, transform)
-        self.max_length = max_length
+        self.max_full_length = max_full_length
+        self.max_user_length = max_user_length
+        self.max_assistant_length = max_assistant_length
     
     def process(self):
         super().process()
@@ -282,14 +286,14 @@ class CausalDataset(BaseDataset):
                 images = self.img,
                 padding = "max_length",
                 truncation = True,
-                max_length = self.max_length,
+                max_length = self.max_user_length,
                 return_tensors = "pt"
             )
             inp["labels"] = self.processor.tokenizer(
                 text = self.ans,
                 padding = "max_length",
                 truncation = True,
-                max_length = 60,
+                max_length = self.max_assistant_length,
                 return_tensors = "pt"
             ).input_ids
             inp = {k: v.squeeze(0) for k, v in inp.items()}
@@ -302,7 +306,7 @@ class CausalDataset(BaseDataset):
             images = self.img,
             padding = "max_length",
             truncation = True,
-            max_length = self.max_length,
+            max_length = self.max_full_length,
             return_tensors = "pt"
         )
         merge = {k: v.squeeze(0) for k, v in merge.items()}

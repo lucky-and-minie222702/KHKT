@@ -46,7 +46,9 @@
 
 	"train_ds_args": {
 		"setting": "qwen",
-		"max_length": 1000,
+		"max_full_length": 250,
+		"max_user_length": 190,
+		"max_assistant_length": 60,
 		"img_size": [224, 224],
 		"transform": {
 			"brightness": 0.1,
