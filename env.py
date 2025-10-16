@@ -125,7 +125,11 @@ class TrainingEnvironment:
             res = {}
             
             test_ds = self.get_test(mode = "train", **test_ds_args)
-            trainer_met = self.trainer.evaluate(test_ds)
-            res["trainer_eval"] = trainer_met
+            test_dl = get_dataloader(
+                test_ds,
+                shuffle = False,
+                batch_size = test_batch_size,
+            )
+            res["loss"] = self.model_interface.get_loss(test_dl)
             
             joblib.dump(res, f"{test_output_file}")
