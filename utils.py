@@ -189,12 +189,16 @@ class TextUtils:
 
 # utils for model
 class ModelUtils: 
-    class TrainerCustomCallback(TrainerCallback):
-        def __init__(self, output_dir = None, output_file = "losses.json"):
+    class SaveLogsCallback(TrainerCallback):
+        def __init__(self, output_dir = None, output_file = None):
             self.output_dir = output_dir
             if self.output_dir is None:
-                output_dir = "."
+                self.output_dir = "."
+                
             self.output_file = output_file
+            if self.output_file is None:
+                self.output_file = "logs.json"
+
             self.loss_data = {"train": [], "eval": []}
 
         def on_log(self, args, state, control, logs = None, **kwargs):
@@ -208,7 +212,7 @@ class ModelUtils:
             p = f"{self.output_dir}/{self.output_file}"
             with open(p, "w") as f:
                 json.dump(self.loss_data, f)
-            print(f"Losses saved to {p}")
+            print(f"Losses  to {p}")
     
     @staticmethod
     def pad_and_trunc(t, max_len, pad_id, side = "right"):

@@ -71,6 +71,8 @@ class TrainingEnvironment:
         generation_conf = None,
         
         is_causal = True,
+        
+        logs_output_file = None,
         test_output_file = None,
     ):
         if do_train:
@@ -93,7 +95,7 @@ class TrainingEnvironment:
                 eval_dataset = val_ds,
                 
                 callbacks = [
-                    ModelUtils.TrainerSaveLossCallback(self.training_arguments.output_dir),
+                    ModelUtils.SaveLogsCallback(self.training_arguments.output_dir, logs_output_file),
                 ],
             )
             print(f"GPUS: {self.trainer.args.n_gpu}")
