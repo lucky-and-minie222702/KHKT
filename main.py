@@ -24,6 +24,6 @@ env.train(
     
     is_causal = conf["setting"] in CAUSAL_SETTINGS,
     
-    test_output_dir = conf.get("test_output_dir"),
+    test_output_file = conf.get("test_output_file"),
 )
 

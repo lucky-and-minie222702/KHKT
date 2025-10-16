@@ -71,7 +71,7 @@ class TrainingEnvironment:
         generation_conf = None,
         
         is_causal = True,
-        test_output_dir = None,
+        test_output_file = None,
     ):
         if do_train:
             self.model_interface.processor.tokenizer.padding_side = 'right'
@@ -84,7 +84,7 @@ class TrainingEnvironment:
             
             self.model_interface.to_lora(**lora_args)
             
-            self.trainer = TokenWiseAccuracyTrainer(
+            self.trainer = Trainer(
                 model = self.model_interface.model,
                 args = self.training_arguments,
                 processing_class = self.model_interface.processor,
@@ -116,19 +116,16 @@ class TrainingEnvironment:
                 batch_size = test_batch_size,
             )
             
-            res = self.model_interface.test(
-                dl = test_dl,
-                output_dir = None,
-                generation_config = generation_conf,
-                format_data_fn = format_data_fn,
-            ).results
+            # res = self.model_interface.test(
+            #     dl = test_dl,
+            #     output_dir = None,
+            #     generation_config = generation_conf,
+            #     format_data_fn = format_data_fn,
+            # ).results
+            res = {}
             
             test_ds = self.get_test(mode = "train", **test_ds_args)
-            test_dl = get_dataloader(
-                test_ds,
-                shuffle = False,
-                batch_size = test_batch_size,
-            )
-            res["loss"] = self.model_interface.get_loss(test_dl)
+            trainer_met = self.trainer.evaluate(test_ds)
+            res["trainer_eval"] = trainer_met
             
-            joblib.dump(res, f"{test_output_dir}/test.results")
+            joblib.dump(res, f"{test_output_file}")

@@ -7,7 +7,7 @@
 	"fold_idx": 1,
 
 	"test_batch_size": 16,
-	"test_output_dir": "results/models",
+	"test_output_file": "results/models/test.results",
 
 	"training_args": {
 		"output_dir": "results/models",
