@@ -11,10 +11,12 @@ from qwen_vl_utils import process_vision_info
 class ModelInterface:
     def __init__(
         self, 
+        setting,
         pretrained_name, 
         model_class = None, 
         processor_class = None
     ):  
+        self.setting = setting
         self.pretrained_name = pretrained_name
         self.model_class = model_class
         self.processor_class = processor_class
@@ -35,10 +37,16 @@ class ModelInterface:
 
         self.processor = self.processor_class.from_pretrained(self.pretrained_name)
         
+    def prepare_for_lora_training(self):
+        if self.setting == "qwen":
+            for p in self.model.merger.parameters():
+                p.requires_grad = True
+        
     def to_lora(self, **kwargs):
         lora_config = LoraConfig(**kwargs)
         
         self.model = get_peft_model(self.model, lora_config)
+        self.prepare_for_lora_training()
         
     def infer(self, dl, returns =  ["output"], generation_config = {}):
         inputs = []

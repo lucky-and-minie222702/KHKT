@@ -116,13 +116,12 @@ class TrainingEnvironment:
                 batch_size = test_batch_size,
             )
             
-            # res = self.model_interface.test(
-            #     dl = test_dl,
-            #     output_dir = None,
-            #     generation_config = generation_conf,
-            #     format_data_fn = format_data_fn,
-            # ).results
-            res = {}
+            res = self.model_interface.test(
+                dl = test_dl,
+                output_dir = None,
+                generation_config = generation_conf,
+                format_data_fn = format_data_fn,
+            ).results
             
             if is_causal:
                 self.model_interface.processor.tokenizer.padding_side = 'right'

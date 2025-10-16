@@ -23,14 +23,6 @@ def get_config(setting):
             "dataset_class": CausalDataset,
             "format_data_fn": CausalDataFormatter(),
         })
-    elif setting == "medgemma":
-        from transformers import AutoModelForImageTextToText, AutoProcessor
-        conf.update({
-            "model_class": AutoModelForImageTextToText,
-            "processor_class": AutoProcessor,
-            "dataset_class": CausalDataset,
-            "format_data_fn": CausalDataFormatter(),
-        })
         
     return conf
 
@@ -38,6 +30,7 @@ def get_env(conf):
     class_conf = get_config(conf["setting"])
 
     model_interface = ModelInterface(
+        setting = conf["setting"],
         pretrained_name = conf["pretrained_name"],
         model_class = class_conf["model_class"],
         processor_class = class_conf["processor_class"],
