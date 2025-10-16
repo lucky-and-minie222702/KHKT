@@ -124,6 +124,9 @@ class TrainingEnvironment:
             # ).results
             res = {}
             
+            if is_causal:
+                self.model_interface.processor.tokenizer.padding_side = 'left'
+            
             test_ds = self.get_test(mode = "train", **test_ds_args)
             test_dl = get_dataloader(
                 test_ds,
