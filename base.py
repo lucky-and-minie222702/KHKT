@@ -77,7 +77,7 @@ class ModelInterface:
             pbar = tqdm(dl)
             for batch in pbar:
                 batch = {k: v.to(self.model.device) for k, v in batch.items()}
-                print(batch)
+                print(batch["labels"].shape)
                 exit()
                 losses.append(self.model(**batch).loss.item())
                 pbar.set_postfix(loss = np.mean(losses))
