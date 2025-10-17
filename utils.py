@@ -100,19 +100,26 @@ class ImageUtils:
     
     @staticmethod
     def change_size(img, target_size):
-        fill_color = (0, 0, 0)
-        target_h, target_w = target_size
-        img_h, img_w = img.size
-        img = img.resize((target_w, target_w * img_h // img_w), resample = Image.BICUBIC)
-        img_h, img_w = img.size
-
-        w, h = img.size
+        orig_w, orig_h = img.size
         target_w, target_h = target_size
+        aspect = orig_w / orig_h
+        target_aspect = target_w / target_h
 
-        if w > target_w or h > target_h:
-            return ImageOps.fit(img, target_size, method = Image.BICUBIC, centering = (0.5, 0.5))
+        if aspect > target_aspect:
+            new_w = target_w
+            new_h = int(target_w / aspect)
         else:
-            return ImageOps.pad(img, target_size, method = Image.BICUBIC, color = fill_color, centering = (0.5, 0.5))
+            new_h = target_h
+            new_w = int(target_h * aspect)
+
+        img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+        result = Image.new("RGB", (target_w, target_h), (0, 0, 0))
+        offset_x = (target_w - new_w) // 2
+        offset_y = (target_h - new_h) // 2
+        result.paste(img, (offset_x, offset_y))
+
+        return result
         
 
 class TextUtils:
