@@ -69,9 +69,11 @@ class ImgDataset(Dataset):
         return len(self.paths)
         
     def __getitem__(self, index):
+        img = Image.open(self.paths[index])
+        print(img, img.shape)
         batch = processor(
             text = [""],
-            images = [Image.open(self.paths[index])]
+            images = [img]
         )
         renamed_batch = {
             "hidden_states": batch["pixel_values"],
