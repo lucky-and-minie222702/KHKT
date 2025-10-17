@@ -16,6 +16,7 @@ from sklearn.model_selection import KFold
 from torch.utils.data import DataLoader
 from transformers import Trainer
 from tqdm import tqdm
+import pynvml
 
 
 class DFDistributor:
@@ -205,6 +206,36 @@ class ModelUtils:
             with open(self.output_file, "w") as f:
                 json.dump(self.loss_data, f)
             print(f"Logs are saved to {self.output_file}")
+            	
+             
+    class GpuUsageCallback(TrainerCallback):
+        def __init__(self, device_index=0):
+            super().__init__()
+            self.device_index = device_index
+            pynvml.nvmlInit()
+            self.handle = pynvml.nvmlDeviceGetHandleByIndex(device_index)
+
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            if not torch.cuda.is_available():
+                return
+
+            mem_info = pynvml.nvmlDeviceGetMemoryInfo(self.handle)
+            util_info = pynvml.nvmlDeviceGetUtilizationRates(self.handle)
+
+            gpu_mem_used = mem_info.used / 1024**2
+            gpu_mem_total = mem_info.total / 1024**2
+            gpu_util = util_info.gpu
+
+            # msg = (f"Usage: {gpu_util:3d}% | "
+                #    f"Memory: {gpu_mem_used:.1f} / {gpu_mem_total:.1f} MB")
+            # tqdm.write(msg)
+
+            if logs is not None:
+                logs[f"gpu{self.device_index}_used"] = gpu_mem_used
+                logs[f"gpu{self.device_index}_used%"] = gpu_mem_used / gpu_mem_total
+
+            return control
+
     
     @staticmethod
     def pad_and_trunc(t, max_len, pad_id, side = "right"):
