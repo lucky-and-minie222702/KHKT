@@ -146,9 +146,9 @@ all_logits = []
 
 for step, batch in enumerate(pbar, 1):
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
-    print(batch["hidden_states"].shape)
-    exit()
+    B = batch["hidden_states"].shape[0]
     emb = model(**batch)
+    emb = emb.contiguous().view(B, -1, 3584)
     
     with torch.no_grad():
         all_logits.append(emb.detach())
