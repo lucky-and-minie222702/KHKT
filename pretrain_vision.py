@@ -7,6 +7,12 @@ from PIL import Image
 import torch.nn.functional as F
 from torchvision import transforms
 from peft import LoraConfig, get_peft_model
+from tqdm import tqdm
+from torch.optim.lr_scheduler import LambdaLR
+from torch.optim import AdamW
+from torch import nn
+from itertools import chain
+from copy import deepcopy
 
 
 FOLDER = "ctr_images"
@@ -31,7 +37,19 @@ lora_config = LoraConfig(
     bias = "none",
 )
 model = get_peft_model(model, lora_config)
-print(model.get_nb_trainable_parameters())
+
+
+class Proj(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.blocks = nn.Sequential(
+            nn.Linear(3584, 1792),
+            nn.SiLU(),
+            nn.Linear(1792, 3584),
+        )
+        
+    def forward(self, x):
+        return self.blocks(x)
 
 
 class ImgDataset(Dataset):
@@ -40,8 +58,8 @@ class ImgDataset(Dataset):
         self.paths = [f"{FOLDER}/{p}" for p in os.listdir(FOLDER)]
         self.transform = transforms.Compose([
             transforms.ColorJitter(
-                brightness = 0.05,
-                contrast = 0.05,
+                brightness = 0.1,
+                contrast = 0.1,
             )
         ])
         
@@ -73,3 +91,46 @@ def contrastive_loss(embeddings, temperature = 1.0):
     return loss
 
 
+def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end):
+    def lr_lambda(current_step):
+        if current_step >= num_training_steps:
+            return lr_end / lr_start
+        progress = current_step / num_training_steps
+        return (1 - progress) * (1 - lr_end / lr_start) + lr_end / lr_start
+
+    return LambdaLR(optimizer, lr_lambda)
+
+
+epoch = 5
+batch_size = 512
+logs_step = 10
+
+train_ds = ImgDataset()
+train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
+repeated_train_dl = chain.from_iterable([train_dl] * epoch)
+optimizer = AdamW(model.parameters(), lr = 5e-4)
+
+pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
+his = []
+best_state_dict = None
+
+for step, batch in enumerate(pbar, 1):
+    emb = model(**batch)
+    
+    loss = contrastive_loss(emb)
+    
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    
+    if loss.item() < min(his):
+        best_state_dict = deepcopy(model.state_dict())
+    
+    his.append(loss.item())
+    
+    if step % logs_step == 0:
+        print(f"Step: {step}, loss: {np.mean(his[:-logs_step:])}")
+    
+    pbar.set_postfix(loss = loss.item())
+    
+torch.save(best_state_dict, "pretrained_vision.torch")
