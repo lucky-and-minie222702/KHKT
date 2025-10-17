@@ -101,6 +101,7 @@ class TrainingEnvironment:
                 
                 callbacks = [
                     ModelUtils.SaveLogsCallback(logs_output_file),
+                    ModelUtils.GpuUsageCallback(),
                 ],
             )
             print(f"GPUS: {self.trainer.args.n_gpu}")

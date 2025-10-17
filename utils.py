@@ -226,9 +226,12 @@ class ModelUtils:
             gpu_mem_total = mem_info.total / 1024**2
             gpu_util = util_info.gpu
 
-            msg = f"GPU Memory: {gpu_mem_used:.1f} / {gpu_mem_total:.1f} MB"
+            msg = f"GPU memory: {gpu_mem_used:.1f} / {gpu_mem_total:.1f} MB"
             tqdm.write(msg)
 
+            if logs is not None:
+                logs[f"gpu{self.device_index}_used"] = gpu_mem_used
+                logs[f"gpu{self.device_index}_used_ratio"] = gpu_mem_used / gpu_mem_total
 
             return control
 
