@@ -18,12 +18,12 @@ from copy import deepcopy
 FOLDER = "ctr_images"
 
 pretrained_name = "Qwen/Qwen2.5-VL-7B-Instruct"
-model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+vision_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     pretrained_name,
     dtype = torch.bfloat16,
     trust_remote_code = True
 ).model.visual
-model.to(torch.device("cuda"))
+vision_model.to(torch.device("cuda"))
 processor = Qwen2_5_VLProcessor.from_pretrained(
     pretrained_name, 
     trust_remote_code = True
@@ -36,20 +36,22 @@ lora_config = LoraConfig(
     target_modules = "all-linear",
     bias = "none",
 )
-model = get_peft_model(model, lora_config)
+vision_model = get_peft_model(vision_model, lora_config)
 
 
-class Proj(nn.Module):
+class CtrModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.blocks = nn.Sequential(
+        self.encoder = vision_model
+        self.proj = nn.Sequential(
             nn.Linear(3584, 1792),
             nn.SiLU(),
             nn.Linear(1792, 3584),
         )
         
-    def forward(self, x):
-        return self.blocks(x)
+    def forward(self, img):
+        emb = self.encoder(img)
+        return self.proj(emb)
 
 
 class ImgDataset(Dataset):
