@@ -70,7 +70,7 @@ class ImgDataset(Dataset):
         
     def __getitem__(self, index):
         img = Image.open(self.paths[index])
-        print(img, img.shape)
+        print(img)
         batch = processor(
             text = [""],
             images = [img]
