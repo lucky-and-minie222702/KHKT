@@ -91,6 +91,7 @@ def contrastive_loss(embeddings, temperature = 1.0):
 
     labels = torch.arange(B)  # (B, )
     labels = labels.long()
+    labels = labels.to(embeddings.device)
 
     logits = sim_matrix / temperature
 
