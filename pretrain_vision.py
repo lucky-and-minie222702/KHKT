@@ -122,6 +122,7 @@ his = []
 best_state_dict = None
 
 for step, batch in enumerate(pbar, 1):
+    batch =  {k: v.to(model.device) for k, v in batch.items()}
     emb = model(**batch)
     
     loss = contrastive_loss(emb)
