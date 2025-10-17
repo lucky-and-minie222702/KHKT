@@ -93,6 +93,7 @@ def contrastive_loss(embeddings, temperature = 0.07):
         B = embeddings.size(0)
         sim_matrix = []
         for i in range(0, B, chunk_size):
+            print(i)
             x = embeddings[i:i+chunk_size]
             sim_part = torch.matmul(x, embeddings.T)  # (chunk, B)
             sim_matrix.append(sim_part)
