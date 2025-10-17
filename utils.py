@@ -222,16 +222,10 @@ class ModelUtils:
             mem_info = pynvml.nvmlDeviceGetMemoryInfo(self.handle)
             util_info = pynvml.nvmlDeviceGetUtilizationRates(self.handle)
 
-            gpu_mem_used = mem_info.used / 1024**2
-            gpu_mem_total = mem_info.total / 1024**2
-            gpu_util = util_info.gpu
-
-            msg = f"GPU memory: {gpu_mem_used:.1f} / {gpu_mem_total:.1f} MB"
-            tqdm.write(msg)
 
             if logs is not None:
-                logs[f"gpu{self.device_index}_used"] = gpu_mem_used
-                logs[f"gpu{self.device_index}_used_ratio"] = gpu_mem_used / gpu_mem_total
+                logs[f"gpu_used"] = round(mem_info.used / 1024**2 / 1024**2, 2)
+                logs[f"gpu_used%"] = round(mem_info.used / mem_info.total, 4) * 100
 
             return control
 
