@@ -114,7 +114,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
     return LambdaLR(optimizer, lr_lambda)
 
 
-epoch = 20
+epoch = 60
 batch_size = 64
 accum_step = 80
 
@@ -130,8 +130,6 @@ best_state_dict = None
 all_logits = []
 
 for step, batch in enumerate(pbar, 1):
-    
-    
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
     emb = model(**batch)
     
