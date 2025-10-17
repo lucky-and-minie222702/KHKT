@@ -65,6 +65,9 @@ class ImgDataset(Dataset):
             )
         ])
         
+    def __len__(self):
+        return len(self.paths)
+        
     def __getitem__(self, index):
         batch = processor(
             text = [""],
