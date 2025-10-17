@@ -209,9 +209,9 @@ class ModelUtils:
             	
              
     class GpuUsageCallback(TrainerCallback):
-        def __init__(self, device_index=0):
+        def __init__(self):
             super().__init__()
-            self.device_index = device_index
+            self.device_index = 0
             pynvml.nvmlInit()
             self.handle = pynvml.nvmlDeviceGetHandleByIndex(device_index)
 
