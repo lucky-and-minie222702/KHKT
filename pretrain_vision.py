@@ -151,8 +151,7 @@ for step, batch in enumerate(pbar, 1):
     emb = emb.contiguous().view(B, -1, 3584)
     emb = torch.mean(emb, dim = 1)
     
-    with torch.no_grad():
-        all_logits.append(emb.detach())
+    all_logits.append(emb)
     
     if step % accum_step == 0:
         all_logits = torch.cat(all_logits, dim = 0)
