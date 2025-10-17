@@ -121,7 +121,7 @@ his = []
 best_state_dict = None
 
 for step, batch in enumerate(pbar, 1):
-    print([b.shape for b in batch])
+    print([b.shape for b in batch.values()])
     emb = model(**batch)
     
     loss = contrastive_loss(emb)
