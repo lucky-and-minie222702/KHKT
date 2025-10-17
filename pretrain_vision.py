@@ -85,10 +85,11 @@ class ImgDataset(Dataset):
         
 
 def contrastive_loss(embeddings, temperature = 1.0):
-    embeddings = F.normalize(embeddings, p = 2, dim = -1)  # (N, D)
-    sim_matrix = torch.matmul(embeddings, embeddings.T)  # (N, N)
+    B = embeddings.shape[0]
+    embeddings = F.normalize(embeddings, p = 2, dim = -1)  # (B, D)
+    sim_matrix = torch.matmul(embeddings, embeddings.T)  # (B, N)
 
-    labels = torch.eye(sim_matrix.shape[0], dtype = torch.int, device = embeddings.device)  # (N, N)
+    labels = torch.range(B)  # (B, )
     labels = labels.long()
 
     logits = sim_matrix / temperature
