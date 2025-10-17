@@ -41,6 +41,7 @@ lora_config = LoraConfig(
     bias = "none",
 )
 vision_model = get_peft_model(vision_model, lora_config)
+print(vision_model.get_nb_trainable_parameters())
 
 
 class CtrModel(nn.Module):
