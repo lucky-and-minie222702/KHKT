@@ -107,7 +107,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
     return LambdaLR(optimizer, lr_lambda)
 
 
-epoch = 5
+epoch = 20
 batch_size = 256
 logs_step = 20
 
