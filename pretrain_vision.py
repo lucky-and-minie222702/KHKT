@@ -89,9 +89,19 @@ class ImgDataset(Dataset):
         
 
 def contrastive_loss(embeddings, temperature = 0.07):
+    def chunked_similarity(embeddings, chunk_size):
+        B = embeddings.size(0)
+        sim_matrix = []
+        for i in range(0, B, chunk_size):
+            x = embeddings[i:i+chunk_size]
+            sim_part = torch.matmul(x, embeddings.T)  # (chunk, B)
+            sim_matrix.append(sim_part)
+        return torch.cat(sim_matrix, dim=0)
+
     B = embeddings.shape[0]
     embeddings = F.normalize(embeddings, p = 2, dim = -1)  # (B, D)
-    sim_matrix = torch.matmul(embeddings, embeddings.T)  # (B, N)
+    
+    sim_matrix = chunked_similarity(embeddings, chunk_size = 32)  # (B, B)
 
     labels = torch.arange(B)  # (B, )
     labels = labels.long()
