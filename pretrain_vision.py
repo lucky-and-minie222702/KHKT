@@ -116,7 +116,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 epoch = 20
 batch_size = 64
-logs_step = 100
+logs_step = 50
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
@@ -144,7 +144,7 @@ for step, batch in enumerate(pbar, 1):
         best_state_dict = deepcopy(model.state_dict())
     
     if step % logs_step == 0:
-        tqdm.write(f"Step: {step}, loss: {np.mean(his[:-logs_step:])}")
+        tqdm.write(f"Step: {step}, loss: {np.mean(his[-logs_step::])}")
     
     pbar.set_postfix(loss = loss.item())
     
