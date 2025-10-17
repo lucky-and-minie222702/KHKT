@@ -108,8 +108,8 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 
 epoch = 20
-batch_size = 256
-logs_step = 20
+batch_size = 128
+logs_step = 10
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
