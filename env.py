@@ -87,9 +87,6 @@ class TrainingEnvironment:
             
             self.model_interface.to_lora(**lora_args)
             self.model_interface.model.enable_input_require_grads()
-            for n, p in self.model_interface.model.named_parameters():
-                print(n, p.requires_grad)
-            exit()
             
             if logs_output_file is None:
                 logs_output_file = path.join(self.training_arguments.output_dir, "logs.json")
