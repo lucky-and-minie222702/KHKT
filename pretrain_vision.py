@@ -78,6 +78,8 @@ class ImgDataset(Dataset):
             "grid_thw": batch["image_grid_thw"],
         }
         renamed_batch = {k: v.squeeze(0) for k, v in renamed_batch.items()}
+        print({k: v.shape for k, v in renamed_batch.items()})
+        exit()
         
         return renamed_batch
         
@@ -121,7 +123,6 @@ his = []
 best_state_dict = None
 
 for step, batch in enumerate(pbar, 1):
-    print({k: v.shape for k, v in batch.items()})
     emb = model(**batch)
     
     loss = contrastive_loss(emb)
