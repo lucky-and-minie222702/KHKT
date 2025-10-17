@@ -113,7 +113,7 @@ logs_step = 10
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
 repeated_train_dl = chain.from_iterable([train_dl] * epoch)
-model = CtrModel()
+model = CtrModel().to(torch.device("cuda"))
 optimizer = AdamW(model.parameters(), lr = 5e-4)
 
 pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
