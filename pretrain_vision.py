@@ -26,7 +26,7 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 
 lora_config = LoraConfig(
     r = 8,
-    alpha = 16,
+    lora_alpha = 16,
     target_modules = "all_linear",
     bias = "none",
 )
