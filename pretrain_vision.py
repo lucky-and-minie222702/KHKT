@@ -141,7 +141,7 @@ for step, batch in enumerate(pbar, 1):
     his.append(loss.item())
     
     if loss.item() < min(his) or len(his) == 1:
-        best_state_dict = deepcopy(model.state_dict())
+        best_state_dict = deepcopy(model.encoder.state_dict())
     
     if step % logs_step == 0:
         tqdm.write(f"Step: {step}, loss: {np.mean(his[-logs_step::])}")
