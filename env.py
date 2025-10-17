@@ -86,6 +86,8 @@ class TrainingEnvironment:
             val_ds = self.get_val(fold_idx, **val_ds_args)
             
             self.model_interface.to_lora(**lora_args)
+            print(self.model_interface.model)
+            exit()
             
             if logs_output_file is None:
                 logs_output_file = path.join(self.training_arguments.output_dir, "logs.json")
