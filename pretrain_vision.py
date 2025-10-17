@@ -12,7 +12,7 @@ from peft import LoraConfig, get_peft_model
 FOLDER = "ctr_images"
 
 pretrained_name = "Qwen/Qwen2.5-VL-7B-Instruct"
-model = Qwen2_5_VLForConditionalGeneration(
+model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     pretrained_name,
     dtype = torch.bfloat16,
     trust_remote_code = True
