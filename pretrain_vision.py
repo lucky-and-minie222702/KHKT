@@ -41,7 +41,6 @@ lora_config = LoraConfig(
     bias = "none",
 )
 vision_model = get_peft_model(vision_model, lora_config)
-print(vision_model.get_nb_trainable_parameters())
 
 
 class CtrModel(nn.Module):
@@ -116,8 +115,8 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 
 epoch = 60
-batch_size = 32
-accum_step = 160
+batch_size = 16
+accum_step = 320
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
