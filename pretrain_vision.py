@@ -49,8 +49,8 @@ class CtrModel(nn.Module):
             nn.Linear(1792, 3584),
         )
         
-    def forward(self, img):
-        emb = self.encoder(img)
+    def forward(self, **kwargs):
+        emb = self.encoder(**kwargs)
         return self.proj(emb)
 
 
