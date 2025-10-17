@@ -89,6 +89,7 @@ def contrastive_loss(embeddings, temperature = 1.0):
     sim_matrix = torch.matmul(embeddings, embeddings.T)  # (N, N)
 
     labels = torch.eye(sim_matrix.shape[0], dtype = torch.int, device = embeddings.device)  # (N, N)
+    labels = labels.long()
 
     logits = sim_matrix / temperature
 
