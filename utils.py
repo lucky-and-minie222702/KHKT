@@ -220,12 +220,9 @@ class ModelUtils:
             super().__init__()
             self.device_index = 0
             pynvml.nvmlInit()
-            self.handle = pynvml.nvmlDeviceGetHandleByIndex(device_index)
+            self.handle = pynvml.nvmlDeviceGetHandleByIndex(self.device_index)
 
-        def on_log(self, args, state, control, logs=None, **kwargs):
-            if not torch.cuda.is_available():
-                return
-
+        def on_log(self, args, state, control, logs = None, **kwargs):
             mem_info = pynvml.nvmlDeviceGetMemoryInfo(self.handle)
 
             if logs is not None:
