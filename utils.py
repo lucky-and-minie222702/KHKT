@@ -220,8 +220,6 @@ class ModelUtils:
                 return
 
             mem_info = pynvml.nvmlDeviceGetMemoryInfo(self.handle)
-            util_info = pynvml.nvmlDeviceGetUtilizationRates(self.handle)
-
 
             if logs is not None:
                 logs[f"gpu_used"] = round(mem_info.used / 1024**2 / 1024**2, 2)
