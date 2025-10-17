@@ -33,7 +33,7 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 lora_config = LoraConfig(
     r = 8,
     lora_alpha = 16,
-    target_modules = "all-linear",
+    target_modules = ["qkv", "proj"],
     bias = "none",
 )
 vision_model = get_peft_model(vision_model, lora_config)
@@ -108,7 +108,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 
 epoch = 20
-batch_size = 64
+batch_size = 128
 logs_step = 10
 
 train_ds = ImgDataset()
