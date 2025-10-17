@@ -14,6 +14,7 @@ from torch import nn
 from itertools import chain
 from copy import deepcopy
 import joblib
+from qwen_vl_utils import fetch_image
 
 
 seed_everything(27022009)
@@ -74,6 +75,10 @@ class ImgDataset(Dataset):
         
     def __getitem__(self, index):
         img = Image.open(self.paths[index])
+        img = fetch_image(
+            ele = {"image": img},
+            image_patch_size = 14,
+        )
         batch = processor(
             text = [""],
             images = [img]
