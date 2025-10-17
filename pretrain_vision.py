@@ -139,7 +139,7 @@ for step, batch in enumerate(pbar, 1):
     his.append(loss.item())
     
     if step % logs_step == 0:
-        print(f"Step: {step}, loss: {np.mean(his[:-logs_step:])}")
+        tqdm.write(f"Step: {step}, loss: {np.mean(his[:-logs_step:])}")
     
     pbar.set_postfix(loss = loss.item())
     
