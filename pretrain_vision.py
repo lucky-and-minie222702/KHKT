@@ -27,7 +27,7 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 lora_config = LoraConfig(
     r = 8,
     lora_alpha = 16,
-    target_modules = "all_linear",
+    target_modules = "all-linear",
     bias = "none",
 )
 model = get_peft_model(model, lora_config)
