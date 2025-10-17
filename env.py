@@ -86,7 +86,9 @@ class TrainingEnvironment:
             val_ds = self.get_val(fold_idx, **val_ds_args)
             
             self.model_interface.to_lora(**lora_args)
-            print(self.model_interface.model)
+            self.model_interface.model.enable_input_require_grads()
+            for n, p in self.model_interface.model.named_parameters():
+                print(n, p.requires_grad)
             exit()
             
             if logs_output_file is None:
