@@ -55,6 +55,8 @@ class CtrModel(nn.Module):
         
     def forward(self, **kwargs):
         emb = self.encoder(**kwargs)
+        print(emb.shape)
+        exit()
         return self.proj(emb)
 
 
@@ -142,8 +144,6 @@ all_logits = []
 for step, batch in enumerate(pbar, 1):
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
     emb = model(**batch)
-    print(emb.shape)
-    exit()
     
     with torch.no_grad():
         all_logits.append(emb.detach())
