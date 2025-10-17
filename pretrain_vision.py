@@ -1,4 +1,4 @@
-from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+from transformers import Qwen2_5_VLForConditionalGeneration, Qwen2_5_VLProcessor
 import torch
 from utils import *
 from torch.utils.data import Dataset
@@ -24,7 +24,7 @@ vision_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     trust_remote_code = True
 ).model.visual
 vision_model.to(torch.device("cuda"))
-processor = AutoProcessor.from_pretrained(
+processor = Qwen2_5_VLProcessor.from_pretrained(
     pretrained_name, 
     trust_remote_code = True
 )
@@ -79,8 +79,6 @@ class ImgDataset(Dataset):
             "grid_thw": batch["image_grid_thw"],
         }
         renamed_batch = {k: v.squeeze(0) for k, v in renamed_batch.items()}
-        print({k: v.shape for k, v in renamed_batch.items()})
-        exit()
         
         return renamed_batch
         
