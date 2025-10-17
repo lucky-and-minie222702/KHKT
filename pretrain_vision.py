@@ -149,6 +149,7 @@ for step, batch in enumerate(pbar, 1):
     B = batch["hidden_states"].shape[0]
     emb = model(**batch)
     emb = emb.contiguous().view(B, -1, 3584)
+    emb = torch.mean(emb, dim = 0)
     
     with torch.no_grad():
         all_logits.append(emb.detach())
