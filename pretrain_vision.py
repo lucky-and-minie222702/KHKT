@@ -16,6 +16,9 @@ from copy import deepcopy
 import joblib
 
 
+seed_everything(27022009)
+
+
 FOLDER = "ctr_images"
 
 pretrained_name = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -85,7 +88,7 @@ class ImgDataset(Dataset):
         
         
 
-def contrastive_loss(embeddings, temperature = 1.0):
+def contrastive_loss(embeddings, temperature = 0.07):
     B = embeddings.shape[0]
     embeddings = F.normalize(embeddings, p = 2, dim = -1)  # (B, D)
     sim_matrix = torch.matmul(embeddings, embeddings.T)  # (B, N)
