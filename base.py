@@ -326,48 +326,6 @@ class CausalDataset(BaseDataset):
             
         return merge
     
-class Seq2seqDataset(BaseDataset):
-    def __init__(
-        self, 
-        df, 
-        processor, 
-        mode,  
-        img_size, 
-        input_max_length,
-        label_max_length,
-        contain_label = True,
-        transform = None
-    ):
-        super().__init__(df, processor, mode, img_size, contain_label, transform)
-        self.input_max_length = input_max_length
-        self.label_max_length = label_max_length
-
-    def process(self):
-        super().process()
-        
-        self.quest = f"{INSTRUCTION} {self.quest}"
-        
-        inp = self.processor(
-            text = self.quest,
-            images = self.img,
-            max_length = self.input_max_length,
-            padding = "max_length",
-            truncation = True,
-        )
-        
-        if self.contain_label:
-            label = self.processor.tokenizer(
-                text = self.ans,
-                max_length = self.label_max_length,
-                padding = "max_length",
-                truncation = True,
-            )["input_ids"]
-            label[label == self.processor.tokenizer.pad_token_id] = -100
-            inp["labels"] = label
-        
-        inp = {k: v.squeeze(0) for k, v in inp.items()}
-        return inp
-    
     
 # format data for test
 class BaseDataFormatter():
@@ -396,6 +354,3 @@ class CausalDataFormatter(BaseDataFormatter):
     def fn(self):
         super().fn()
         self.output = self.output[::, self.input.shape[-1]::]
-    
-class Seq2seqDataFormatter(BaseDataFormatter):
-    pass
