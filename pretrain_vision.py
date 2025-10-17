@@ -1,4 +1,4 @@
-from transformers import Qwen2_5_VLForConditionalGeneration, Qwen2_5_VLProcessor
+from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
 import torch
 from utils import *
 from torch.utils.data import Dataset
@@ -24,7 +24,7 @@ vision_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     trust_remote_code = True
 ).model.visual
 vision_model.to(torch.device("cuda"))
-processor = Qwen2_5_VLProcessor.from_pretrained(
+processor = AutoProcessor.from_pretrained(
     pretrained_name, 
     trust_remote_code = True
 )
@@ -70,7 +70,6 @@ class ImgDataset(Dataset):
         
     def __getitem__(self, index):
         img = Image.open(self.paths[index])
-        print(img)
         batch = processor(
             text = [""],
             images = [img]
