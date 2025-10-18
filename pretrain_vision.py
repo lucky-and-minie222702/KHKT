@@ -49,10 +49,10 @@ class CtrModel(nn.Module):
         super().__init__()
         self.encoder = vision_model
         self.proj = nn.Sequential(
-            nn.Linear(3584, 1792, dtype = torch.bfloat16),
-            nn.BatchNorm1d(1792),
+            nn.Linear(3584, 2432, dtype = torch.bfloat16),
+            nn.BatchNorm1d(2432),
             nn.SiLU(),
-            nn.Linear(1792, 896, dtype = torch.bfloat16),
+            nn.Linear(2432, 1280, dtype = torch.bfloat16),
         )
         
     def forward(self, **kwargs):
