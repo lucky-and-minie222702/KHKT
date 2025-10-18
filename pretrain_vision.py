@@ -143,7 +143,7 @@ optimizer = AdamW(model.parameters(), lr = 5e-5)
 
 train_step = (len(train_dl) * epoch) // accum_step
 lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
-pbar = tqdm(repeated_train_dl, total = train_step, ncols = 100)
+pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 
 
 his = []
