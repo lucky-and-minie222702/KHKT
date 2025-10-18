@@ -130,60 +130,61 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
     return LambdaLR(optimizer, lr_lambda)
 
 
-epoch = 60
-batch_size = 16
-accum_step = 220
-log_step = 3
+if __name__ == "main":
+    epoch = 60
+    batch_size = 16
+    accum_step = 220
+    log_step = 3
 
-train_ds = ImgDataset()
-train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
-repeated_train_dl = chain.from_iterable([train_dl] * epoch)
-model = CtrModel().to(torch.device("cuda"))
-optimizer = AdamW(model.parameters(), lr = 5e-5)
+    train_ds = ImgDataset()
+    train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
+    repeated_train_dl = chain.from_iterable([train_dl] * epoch)
+    model = CtrModel().to(torch.device("cuda"))
+    optimizer = AdamW(model.parameters(), lr = 5e-5)
 
-train_step = (len(train_dl) * epoch) // accum_step
-lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
-pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
+    train_step = (len(train_dl) * epoch) // accum_step
+    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
+    pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 
 
-his = []
-best_state_dict = None
-all_logits = []
-update_step = 0
+    his = []
+    best_state_dict = None
+    all_logits = []
+    update_step = 0
 
-for step, batch in enumerate(pbar, 1):
-    batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
-    B = batch["hidden_states"].shape[0]
-    emb = model(**batch)
-    emb = emb.contiguous().view(B, -1, 1280)
-    emb = torch.mean(emb, dim = 1)
-    
-    if (step + 1) % accum_step != 0:
-        all_logits.append(emb.detach())
-    else:
-        all_logits.append(emb)
-
-    if step % accum_step == 0:
-        update_step += 1
-
-        all_logits = torch.cat(all_logits, dim = 0)
-        loss = contrastive_loss(all_logits)
+    for step, batch in enumerate(pbar, 1):
+        batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
+        B = batch["hidden_states"].shape[0]
+        emb = model(**batch)
+        emb = emb.contiguous().view(B, -1, 1280)
+        emb = torch.mean(emb, dim = 1)
         
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        lr_scheduler.step()
-        
-        his.append(loss.item())
-        
-        if loss.item() < min(his) or len(his) == 1:
-            best_state_dict = deepcopy(model.encoder.state_dict())
-            torch.save(best_state_dict, "pretrained_vision.torch")
-        
-        if update_step % log_step == 0:
-            tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr: {optimizer.param_groups[0]['lr']}")
-        
-        all_logits = []
-        pbar.set_postfix(loss = loss.item())
+        if (step + 1) % accum_step != 0:
+            all_logits.append(emb.detach())
+        else:
+            all_logits.append(emb)
 
-joblib.dump(his, "pretrained_vision.history")
+        if step % accum_step == 0:
+            update_step += 1
+
+            all_logits = torch.cat(all_logits, dim = 0)
+            loss = contrastive_loss(all_logits)
+            
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            lr_scheduler.step()
+            
+            his.append(loss.item())
+            
+            if loss.item() < min(his) or len(his) == 1:
+                best_state_dict = deepcopy(model.encoder.state_dict())
+                torch.save(best_state_dict, "pretrained_vision.torch")
+            
+            if update_step % log_step == 0:
+                tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr: {optimizer.param_groups[0]['lr']}")
+            
+            all_logits = []
+            pbar.set_postfix(loss = loss.item())
+
+    joblib.dump(his, "pretrained_vision.history")

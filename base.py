@@ -11,12 +11,10 @@ from qwen_vl_utils import process_vision_info
 class ModelInterface:
     def __init__(
         self, 
-        setting,
         pretrained_name, 
         model_class = None, 
         processor_class = None
     ):  
-        self.setting = setting
         self.pretrained_name = pretrained_name
         self.model_class = model_class
         self.processor_class = processor_class
@@ -37,16 +35,28 @@ class ModelInterface:
 
         self.processor = self.processor_class.from_pretrained(self.pretrained_name)
         
-    def prepare_for_lora_training(self):
-        if self.setting == "qwen":
-            for p in self.model.model.visual.merger.parameters():
-                p.requires_grad = True
+    def prepare_before_lora(self):
+        vision_lora_config = LoraConfig(
+            r = 8,
+            lora_alpha = 16,
+            target_modules = ["qkv", "proj"],
+            bias = "none",
+        )
+        vision = self.model.model.visual
+        vision = get_peft_model(vision, vision_lora_config)
+        vision.load_state_dict(torch.load("pretrained_vision.torch"))
+        vision.merge_and_unload()
+        
+    def prepare_after_lora(self):
+        for p in self.model.model.visual.merger.parameters():
+            p.requires_grad = True
         
     def to_lora(self, **kwargs):
         lora_config = LoraConfig(**kwargs)
         
+        self.prepare_before_lora()
         self.model = get_peft_model(self.model, lora_config)
-        self.prepare_for_lora_training()
+        self.prepare_after_lora()
         
     def infer(self, dl, returns =  ["output"], generation_config = {}):
         inputs = []
@@ -150,9 +160,7 @@ class ModelInterface:
 
 INSTRUCTION = "You are a medical vision assistant about gastroIntestinal image"
 
-ASSISTANT_TEXT = {
-    "qwen": "<|im_start|>assistant\n",
-}
+ASSISTANT_TEXT = "<|im_start|>assistant\n"
 
 # dataset	     
 class BaseDataset(Dataset):
@@ -163,7 +171,6 @@ class BaseDataset(Dataset):
         processor, 
         mode, 
         img_size, 
-        setting = None,
         contain_label = True, 
         transform = None
     ):
@@ -185,8 +192,6 @@ class BaseDataset(Dataset):
         self.quest = None
         self.ans = None
         self.img = None
-        
-        self.setting = setting
         
     def process(self):
         self.quest = self.data[self.index]["question"].strip()
@@ -224,11 +229,10 @@ class CausalDataset(BaseDataset):
         full_max_length,
         user_max_length,
         assistant_max_length,
-        setting = None,
         contain_label = True,
         transform = None
     ):
-        super().__init__(df, processor, mode, img_size, setting, contain_label, transform)
+        super().__init__(df, processor, mode, img_size, contain_label, transform)
         self.full_max_length = full_max_length
         self.user_max_length = user_max_length
         self.assistant_max_length = assistant_max_length
@@ -276,8 +280,7 @@ class CausalDataset(BaseDataset):
         
         merge_mes = inp_mes + out_mes
         
-        if self.setting == "qwen":
-            self.img, _ = process_vision_info(merge_mes)
+        self.img, _ = process_vision_info(merge_mes)
             
         if self.mode == "infer":
             inp_text = self.processor.apply_chat_template(inp_mes, tokenize = False, add_generation_prompt = True)
@@ -314,7 +317,7 @@ class CausalDataset(BaseDataset):
         if not self.contain_label:
             return merge
         
-        assistant_pattern = self.processor.tokenizer.encode(ASSISTANT_TEXT[self.setting])
+        assistant_pattern = self.processor.tokenizer.encode(ASSISTANT_TEXT)
         
         assistant_idx = find_subsequence(merge["input_ids"].tolist(), assistant_pattern)
         inp_len = assistant_idx + len(assistant_pattern)

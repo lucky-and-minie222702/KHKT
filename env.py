@@ -71,8 +71,6 @@ class TrainingEnvironment:
         format_data_fn = None,
         generation_conf = None,
         
-        is_causal = True,
-        
         logs_output_file = None,
         test_output_file = None,
     ):
@@ -112,8 +110,7 @@ class TrainingEnvironment:
             if test_ds_args is None:
                 test_ds_args = train_ds_args
 
-            if is_causal:
-                self.model_interface.processor.tokenizer.padding_side = 'left'
+            self.model_interface.processor.tokenizer.padding_side = 'left'
                 
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             self.model_interface.model.to(device)
@@ -132,8 +129,7 @@ class TrainingEnvironment:
                 format_data_fn = format_data_fn,
             ).results
             
-            if is_causal:
-                self.model_interface.processor.tokenizer.padding_side = 'right'
+            self.model_interface.processor.tokenizer.padding_side = 'right'
             
             test_ds = self.get_test(mode = "train", **test_ds_args)
             test_dl = get_dataloader(

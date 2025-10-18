@@ -10,7 +10,7 @@ env.train(
     do_test = conf.get("do_test", True),
     do_train = conf.get("do_train", True),
     
-    format_data_fn = class_conf["format_data_fn"],
+    format_data_fn = CausalDataFormatter(),
     
     lora_args = conf.get("lora_args"),
     
@@ -21,8 +21,6 @@ env.train(
     test_batch_size = conf.get("test_batch_size"),
     
     generation_conf = conf.get("generation_conf"),
-    
-    is_causal = conf["setting"] in CAUSAL_SETTINGS,
     
     logs_output_file = conf.get("logs_output_file"),
     test_output_file = conf.get("test_output_file"),
