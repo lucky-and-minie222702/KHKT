@@ -50,6 +50,7 @@ class CtrModel(nn.Module):
         self.encoder = vision_model
         self.proj = nn.Sequential(
             nn.Linear(3584, 1792, dtype = torch.bfloat16),
+            nn.BatchNorm1d(1792),
             nn.SiLU(),
             nn.Linear(1792, 896, dtype = torch.bfloat16),
         )
@@ -137,7 +138,7 @@ train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
 repeated_train_dl = chain.from_iterable([train_dl] * epoch)
 model = CtrModel().to(torch.device("cuda"))
-optimizer = AdamW(model.parameters(), lr = 5e-4)
+optimizer = AdamW(model.parameters(), lr = 1e-4)
 
 pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 his = []
