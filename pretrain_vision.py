@@ -132,8 +132,8 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 epoch = 60
 batch_size = 16
-accum_step = 120
-log_step = 5
+accum_step = 220
+log_step = 3
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
@@ -141,7 +141,11 @@ repeated_train_dl = chain.from_iterable([train_dl] * epoch)
 model = CtrModel().to(torch.device("cuda"))
 optimizer = AdamW(model.parameters(), lr = 5e-5)
 
-pbar = tqdm(repeated_train_dl, total = (len(train_dl) * epoch) // accum_step, ncols = 100)
+train_step = (len(train_dl) * epoch) // accum_step
+lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
+pbar = tqdm(repeated_train_dl, total = train_step, ncols = 100)
+
+
 his = []
 best_state_dict = None
 all_logits = []
@@ -168,17 +172,18 @@ for step, batch in enumerate(pbar, 1):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        lr_scheduler.step()
         
         his.append(loss.item())
         
         if loss.item() < min(his) or len(his) == 1:
             best_state_dict = deepcopy(model.encoder.state_dict())
+            torch.save(best_state_dict, "pretrained_vision.torch")
         
         if update_step % log_step == 0:
             tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr {optimizer.param_groups[0]["lr"]}")
         
         all_logits = []
         pbar.set_postfix(loss = loss.item())
-    
-torch.save(best_state_dict, "pretrained_vision.torch")
+
 joblib.dump(his, "pretrained_vision.history")
