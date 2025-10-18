@@ -130,7 +130,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
     return LambdaLR(optimizer, lr_lambda)
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     epoch = 50
     batch_size = 16
     accum_step = 256
