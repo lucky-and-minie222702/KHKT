@@ -38,7 +38,7 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 lora_config = LoraConfig(
     r = 8,
     lora_alpha = 16,
-    target_modules = ["qkv"],
+    target_modules = ["qkv", "proj"],
     bias = "none",
 )
 vision_model = get_peft_model(vision_model, lora_config)
@@ -151,8 +151,11 @@ for step, batch in enumerate(pbar, 1):
     emb = emb.contiguous().view(B, -1, 896)
     emb = torch.mean(emb, dim = 1)
     
-    all_logits.append(emb.det)
-    
+    if (step + 1) % accum_step != 0:
+        all_logits.append(emb.detach())
+    else:
+        all_logits.append(emb)
+
     if step % accum_step == 0:
         all_logits = torch.cat(all_logits, dim = 0)
         loss = contrastive_loss(all_logits)
