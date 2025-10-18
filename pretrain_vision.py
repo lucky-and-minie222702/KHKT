@@ -149,7 +149,7 @@ for step, batch in enumerate(pbar, 1):
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
     B = batch["hidden_states"].shape[0]
     emb = model(**batch)
-    emb = emb.contiguous().view(B, -1, 896)
+    emb = emb.contiguous().view(B, -1, 1280)
     emb = torch.mean(emb, dim = 1)
     
     if (step + 1) % accum_step != 0:
