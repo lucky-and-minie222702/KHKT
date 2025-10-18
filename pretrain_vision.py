@@ -133,17 +133,19 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 epoch = 60
 batch_size = 16
 accum_step = 120
+log_step = 5
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
 repeated_train_dl = chain.from_iterable([train_dl] * epoch)
 model = CtrModel().to(torch.device("cuda"))
-optimizer = AdamW(model.parameters(), lr = 1e-4)
+optimizer = AdamW(model.parameters(), lr = 5e-5)
 
 pbar = tqdm(repeated_train_dl, total = (len(train_dl) * epoch) // accum_step, ncols = 100)
 his = []
 best_state_dict = None
 all_logits = []
+update_step = 0
 
 for step, batch in enumerate(pbar, 1):
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
@@ -158,6 +160,8 @@ for step, batch in enumerate(pbar, 1):
         all_logits.append(emb)
 
     if step % accum_step == 0:
+        update_step += 1
+
         all_logits = torch.cat(all_logits, dim = 0)
         loss = contrastive_loss(all_logits)
         
@@ -170,7 +174,8 @@ for step, batch in enumerate(pbar, 1):
         if loss.item() < min(his) or len(his) == 1:
             best_state_dict = deepcopy(model.encoder.state_dict())
         
-        tqdm.write(f"Step: {step // accum_step}, loss: {his[-1]}, lr {optimizer.param_groups[0]["lr"]}")
+        if update_step % log_step == 0:
+            tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr {optimizer.param_groups[0]["lr"]}")
         
         all_logits = []
         pbar.set_postfix(loss = loss.item())
