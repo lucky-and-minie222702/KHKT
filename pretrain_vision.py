@@ -140,7 +140,7 @@ repeated_train_dl = chain.from_iterable([train_dl] * epoch)
 model = CtrModel().to(torch.device("cuda"))
 optimizer = AdamW(model.parameters(), lr = 1e-4)
 
-pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
+pbar = tqdm(repeated_train_dl, total = (len(train_dl) * epoch) // accum_step, ncols = 100)
 his = []
 best_state_dict = None
 all_logits = []
@@ -170,7 +170,7 @@ for step, batch in enumerate(pbar, 1):
         if loss.item() < min(his) or len(his) == 1:
             best_state_dict = deepcopy(model.encoder.state_dict())
         
-        tqdm.write(f"Step: {step // accum_step}, loss: {his[-1]}")
+        tqdm.write(f"Step: {step // accum_step}, loss: {his[-1]}, lr {optimizer.param_groups[0]["lr"]}")
         
         all_logits = []
         pbar.set_postfix(loss = loss.item())
