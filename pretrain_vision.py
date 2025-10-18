@@ -131,7 +131,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 epoch = 60
 batch_size = 16
-accum_step = 240
+accum_step = 120
 
 train_ds = ImgDataset()
 train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
