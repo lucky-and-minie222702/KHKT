@@ -181,7 +181,7 @@ for step, batch in enumerate(pbar, 1):
             torch.save(best_state_dict, "pretrained_vision.torch")
         
         if update_step % log_step == 0:
-            tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr {optimizer.param_groups[0]['lr']}")
+            tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr: {optimizer.param_groups[0]['lr']}")
         
         all_logits = []
         pbar.set_postfix(loss = loss.item())
