@@ -51,7 +51,7 @@ class CtrModel(nn.Module):
         self.proj = nn.Sequential(
             nn.Linear(3584, 1792, dtype = torch.bfloat16),
             nn.SiLU(),
-            nn.Linear(1792, 3584, dtype = torch.bfloat16),
+            nn.Linear(1792, 896, dtype = torch.bfloat16),
         )
         
     def forward(self, **kwargs):
@@ -148,7 +148,7 @@ for step, batch in enumerate(pbar, 1):
     batch =  {k: v.to(torch.device("cuda")) for k, v in batch.items()}
     B = batch["hidden_states"].shape[0]
     emb = model(**batch)
-    emb = emb.contiguous().view(B, -1, 3584)
+    emb = emb.contiguous().view(B, -1, 896)
     emb = torch.mean(emb, dim = 1)
     
     all_logits.append(emb.det)
