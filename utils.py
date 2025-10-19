@@ -41,7 +41,7 @@ def get_dataloader(dataset, batch_size, shuffle = True):
             key: torch.stack([item[key] for item in batch], dim = 0)
             for key in batch[0]
         }
-        
+
     def get_num_workers():
         if "SLURM_CPUS_PER_TASK" in os.environ:
             return int(os.environ["SLURM_CPUS_PER_TASK"])
@@ -51,12 +51,12 @@ def get_dataloader(dataset, batch_size, shuffle = True):
             return 0
 
     return DataLoader(
-        dataset = dataset, 
-        batch_size = batch_size, 
-        shuffle = shuffle, 
-        num_workers = get_num_workers(), 
-        persistent_workers = True, 
-        pin_memory = False, 
+        dataset = dataset,
+        batch_size = batch_size,
+        shuffle = shuffle,
+        num_workers = get_num_workers(),
+        persistent_workers = True,
+        pin_memory = False,
         collate_fn = collate_fn
     )
 
@@ -78,13 +78,13 @@ class ImageUtils:
     @staticmethod
     def get_transform(brightness = 0, contrast = 0, rotation_degree = 0):
         return transforms.Compose([
-            transforms.ColorJitter( 
+            transforms.ColorJitter(
                 brightness = brightness,
                 contrast = contrast,
             ),
             transforms.RandomRotation(rotation_degree),
         ])
-    
+
     @staticmethod
     def get_img_dict():
         file_ids = os.listdir("data/images")
@@ -95,9 +95,9 @@ class ImageUtils:
 
         for file_path, file_id in zip(file_paths, file_ids):
             images[file_id] = file_path
-            
+
         return images
-    
+
     @staticmethod
     def change_size(img, target_size):
         orig_w, orig_h = img.size
@@ -120,7 +120,7 @@ class ImageUtils:
         result.paste(img, (offset_x, offset_y))
 
         return result
-        
+
 
 class TextUtils:
     @staticmethod
@@ -132,7 +132,7 @@ class TextUtils:
             if text[-1] != final_char:
                 text += final_char
         return text
-    
+
     @staticmethod
     def get_scores(predictions, references):
         clean_data = [
@@ -196,9 +196,9 @@ class TextUtils:
 
 
 # utils for model
-class ModelUtils: 
+class ModelUtils:
     class SaveLogsCallback(TrainerCallback):
-        def __init__(self, output_file):    
+        def __init__(self, output_file):
             self.output_file = output_file
             self.loss_data = {"train": [], "eval": []}
 
@@ -213,8 +213,8 @@ class ModelUtils:
             with open(self.output_file, "w") as f:
                 json.dump(self.loss_data, f)
             print(f"Logs are saved to {self.output_file}")
-            	
-             
+
+
     class GpuUsageCallback(TrainerCallback):
         def __init__(self):
             super().__init__()
@@ -231,7 +231,7 @@ class ModelUtils:
 
             return control
 
-    
+
     @staticmethod
     def pad_and_trunc(t, max_len, pad_id, side = "right"):
         pad_l = [pad_id] * max(0, max_len - len(t))
@@ -240,11 +240,11 @@ class ModelUtils:
             return torch.cat((t[:max_len:], pad_l), dim = 0)
         else:
             return torch.cat((pad_l, t[:max_len:]), dim = 0)
-    
+
     @staticmethod
     def get_sentences_from_ids(processor, s, to_numpy = False):
         s = s.detach().cpu().numpy().tolist()
-        s = processor.tokenizer.batch_decode(s, skip_special_tokens = True)    
+        s = processor.tokenizer.batch_decode(s, skip_special_tokens = True)
         if to_numpy:
             s = np.array(s)
         return s
@@ -253,9 +253,9 @@ class ModelUtils:
     def get_scores_from_ids(processor, pred, label):
         pred = ModelUtils.get_sentences_from_ids(processor, pred)
         label = ModelUtils.get_sentences_from_ids(processor, label)
-        
+
         return TextUtils.get_scores(pred, label)
-    
+
     @staticmethod
     def print_trainable_params(model):
         trainable, total = 0, 0
@@ -265,18 +265,18 @@ class ModelUtils:
                 trainable += param.numel()
         print(f"Trainable params: {trainable:,} | Total params: {total:,} "
             f"({100 * trainable / total:.2f}% trainable)")
-        
+
     @staticmethod
     def get_latest_checkpoint(p):
         checkpoints = [d for d in os.listdir(p) if d.startswith("checkpoint")]
-        
+
         if not checkpoints:
             return None
 
         checkpoints = list(map(lambda x: int(x.split("-")[1]), checkpoints))
         latest = sorted(checkpoints)[-1]
         return latest
-        
+
     class TestLogger():
         def __init__(self, processor):
             self.processor = processor
@@ -292,16 +292,16 @@ class ModelUtils:
                 "predictions": [],
                 "labels": [],
             }
-            
+
         def log_per_step(self, quest, pred, label, n_returns):
             quest = ModelUtils.get_sentences_from_ids(self.processor, quest, to_numpy = True)
             pred = ModelUtils.get_sentences_from_ids(self.processor, pred, to_numpy = True).reshape(-1, n_returns)
             label = ModelUtils.get_sentences_from_ids(self.processor, label, to_numpy = True)
-            
+
             self.outputs["questions"].append(quest)
             self.outputs["predictions"].append(pred)
             self.outputs["labels"].append(label)
-            
+
             all_scores = {
                 "bleu": [],
                 "rouge1": [],
@@ -309,22 +309,22 @@ class ModelUtils:
                 "rougeL": [],
                 "meteor": [],
             }
-            
+
             for i in range(n_returns):
                 scores = TextUtils.get_scores(pred[::, i], label)
                 for k, v in scores.items():
                     all_scores[k].append(v)
-            
+
             for k, v in all_scores.items():
                 self.scores[k].append(v)
-                
+
         def end(self):
             for k, v in self.outputs.items():
                 self.outputs[k] = np.concatenate(v, axis = 0)
-                
+
             for k, v in self.scores.items():
                 self.scores[k] = np.mean(v, axis = 0)
-                
+
         @property
         def cur_scores(self):
             cur_scores = self.scores.copy()
@@ -333,24 +333,24 @@ class ModelUtils:
                     np.mean(v, axis = 0), axis = -1
                 )
             return cur_scores
-                
+
         @property
         def results(self):
             return {
                 "outputs": self.outputs,
                 "scores": self.scores,
             }
-            
+
         class ResultsReader():
             def __init__(self, file_path):
                 raw_data = joblib.load(file_path)["outputs"]
-                
+
                 self.questions = raw_data["questions"]
                 self.labels = raw_data["labels"]
                 self.predictions = raw_data["predictions"][::, 0]
-                
+
                 self.questions = [s[s.find("user\n") + len("user\n")::] for s in self.questions]
-                
+
                 self.questions = np.array(self.questions)
                 self.labels = np.array(self.labels)
                 self.predictions = np.array(self.predictions)
