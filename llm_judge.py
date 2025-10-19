@@ -4,6 +4,7 @@ from utils import *
 import re
 import sys
 import pandas as pd
+from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 config = load_json(sys.argv[1])
 
@@ -11,12 +12,19 @@ model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = AutoModelForCausalLM.from_pretrained(
+with init_empty_weights():
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        trust_remote_code = True,
+        dtype = torch.bfloat16,
+        # device_map = "auto",
+        # low_cpu_mem_usage = True,
+    )
+model = load_checkpoint_and_dispatch(
+    model,
     model_name,
-    trust_remote_code=True,
-    device_map="auto",
-    dtype=torch.bfloat16,
-    # low_cpu_mem_usage = True,
+    device_map = "auto",
+    dtype = torch.bfloat16
 )
 tokenizer.padding_side = "left"
 
