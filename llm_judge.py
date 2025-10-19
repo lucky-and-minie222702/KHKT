@@ -58,9 +58,9 @@ Guidelines:
     
 ---
 OUTPUT JSON FORMAT:
-{
-  "<QUESTION_CLASS>": "<SCORE_1_OR_0>"
-}
+{{
+  "<QUESTION_CLASS>": score (0 or 1)
+}}
 """
 
 def build_prompt(*args, **kwargs):
