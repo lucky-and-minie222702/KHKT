@@ -3,7 +3,7 @@ import sys
 
 conf = load_json(sys.argv[1])
 
-env, model_interface, class_conf = get_env(conf)
+env, model_interface = get_env(conf)
 env.train(
     fold_idx = conf.get("fold_idx"),
     
