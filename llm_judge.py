@@ -60,7 +60,7 @@ Guidelines:
 ---
 OUTPUT JSON FORMAT:
 {{
-  ["<QUESTION_CLASS>": score (0 or 1), "<QUESTION_CLASS>": score (0 or 1), ...]
+  "<QUESTION_CLASS>": score (0 or 1)
 }}
 """
 
@@ -106,9 +106,9 @@ def judge_batch(prompts):
     for i in range(len(gen_ids)):
         gen_slice = gen_ids[i]
         text = tokenizer.decode(gen_slice, skip_special_tokens = True).strip()
-        print(text)
-        exit()
         outs.append(parse_json_safe(text))
+    print(outs)
+    exit()
     return outs
 
 
@@ -126,7 +126,7 @@ batch_size = config["batch_size"]
 
 pbar = tqdm(range(0, n_samples, batch_size), total = (n_samples + batch_size - 1) // batch_size)
 results = []
-get_acc = lambda: np.mean([float(j["score"]) for j in results])
+get_acc = lambda: np.mean([float(j) for j in results.values()])
 
 for start in pbar:
     end = min(start + batch_size, n_samples)
