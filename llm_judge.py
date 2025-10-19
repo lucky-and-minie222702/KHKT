@@ -55,6 +55,7 @@ Guidelines:
     - Consider it dissimilar if the prediction is clearly wrong, contradictory, or unrelated.
     - Accept paraphrases, synonyms, or partial overlaps if they preserve the essential ideas.
     - Assigning a binary score: 1 = similar, 0 = dissimilar.
+    - Output JSON only, no extra text.
     
 ---
 OUTPUT JSON FORMAT:
