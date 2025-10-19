@@ -12,19 +12,12 @@ model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-with init_empty_weights():
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        trust_remote_code = True,
-        dtype = torch.bfloat16,
-        # device_map = "auto",
-        # low_cpu_mem_usage = True,
-    )
-model = load_checkpoint_and_dispatch(
-    model,
+model = AutoModelForCausalLM.from_pretrained(
     model_name,
+    trust_remote_code = True,
+    dtype = torch.bfloat16,
     device_map = "auto",
-    dtype = torch.bfloat16
+    # low_cpu_mem_usage = True,
 )
 tokenizer.padding_side = "left"
 
