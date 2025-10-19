@@ -51,9 +51,11 @@ You are given:
 Your task: Judge how similar each evaluation aspect of the model's prediction is to the correct answer.
 
 Guidelines:
-    - Consider similar credit if the prediction captures the main meanings or intents, addresses all parts of the question.
-    - Consider it dissimilar if the prediction is clearly wrong, contradictory, or unrelated.
-    - Accept paraphrases, synonyms, or partial overlaps if they preserve the essential ideas.
+    - Treat related forms like “polyp” and “polypoid” as semantically similar when they refer to the same medical concept.
+    - Focus on meaning rather than exact wording or morphology.
+    - Ignore stylistic or grammatical differences.
+    - Accept: synonyms, abbreviations, and medically equivalent expressions as similar.
+    - Only consider it dissimilar if the prediction is clearly wrong, contradictory, or unrelated.
     - Assigning a binary score: 1 = similar, 0 = dissimilar.
     - Output JSON only, no extra text.
     
