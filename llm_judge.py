@@ -59,7 +59,9 @@ Guidelines:
 ---
 OUTPUT JSON FORMAT:
 {{
-  "<QUESTION_CLASS>": score (0 or 1)
+  "<QUESTION_CLASS>": score (0 or 1),
+  "<QUESTION_CLASS>": score (0 or 1),
+  ...
 }}
 """
 
