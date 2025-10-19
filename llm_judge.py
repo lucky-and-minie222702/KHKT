@@ -164,4 +164,4 @@ results_df = pd.DataFrame({
     "question_class": df["question_class"],
 })
 
-results_df.to_csv(f"results/{config['dir']}/checkpoint-{checkpoint}-llm-judge.csv", index = False)
+results_df.to_csv(f"{config['dir']}/checkpoint-{checkpoint}-llm-judge.csv", index = False)
