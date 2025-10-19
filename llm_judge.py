@@ -17,7 +17,7 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code = True,
     device_map = "auto",  
     dtype = torch.bfloat16,
-    low_cpu_mem_usage = True,
+    # low_cpu_mem_usage = True,
 )
 tokenizer.padding_side = 'left'
 
