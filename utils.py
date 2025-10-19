@@ -342,8 +342,7 @@ class ModelUtils:
             }
             
         class ResultsReader():
-            def __init__(self, dir, checkpoint):
-                file_path = f"results/{dir}/checkpoint-{checkpoint}-test.results"
+            def __init__(self, file_path):
                 raw_data = joblib.load(file_path)["outputs"]
                 
                 self.questions = raw_data["questions"]
