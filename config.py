@@ -5,7 +5,6 @@ from transformers import Qwen2_5_VLForConditionalGeneration, Qwen2_5_VLProcessor
 
 def get_env(conf):
     model_interface = ModelInterface(
-        setting = conf["setting"],
         pretrained_name = conf["pretrained_name"],
         model_class = Qwen2_5_VLForConditionalGeneration,
         processor_class = Qwen2_5_VLProcessor,
