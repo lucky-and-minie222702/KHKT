@@ -6,7 +6,6 @@ import sys
 import pandas as pd
 
 config = load_json(sys.argv[1])
-checkpoint = config.get("checkpoint", ModelUtils.get_latest_checkpoint(config["dir"]))
 
 model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 
@@ -173,4 +172,4 @@ results_df = pd.DataFrame(
     }
 )
 
-results_df.to_csv(f"{config['dir']}/checkpoint-{checkpoint}-llm-judge.csv", index=False)
+results_df.to_csv(config.get("output_file", f"{config['dir']}/llm-judge.csv", index = False))
