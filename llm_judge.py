@@ -159,7 +159,7 @@ results_df = pd.DataFrame({
     "label": reader.labels,
     "prediction": reader.predictions,
     
-    "judge": res,
+    "judge": results,
 
     "complexity": df["complexity"],
     "question_class": df["question_class"],
