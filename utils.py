@@ -349,9 +349,8 @@ class ModelUtils:
                 self.labels = raw_data["labels"]
                 self.predictions = raw_data["predictions"][::, 0]
                 
-                norm_func = lambda s:  s[:-1:] if s[-1] == "," else s
-                norm_map = lambda a: np.array([norm_func(s) for s in a])
+                self.questions = [s[s.find("user\n") + len("user\n")::] for s in self.questions]
                 
-                self.questions = norm_map(self.questions)
-                self.labels = norm_map(self.labels)
-                self.predictions = norm_map(self.predictions)
+                self.questions = np.array(self.questions)
+                self.labels = np.array(self.labels)
+                self.predictions = np.array(self.predictions)
