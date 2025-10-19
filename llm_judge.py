@@ -126,7 +126,11 @@ batch_size = config["batch_size"]
 
 pbar = tqdm(range(0, n_samples, batch_size), total = (n_samples + batch_size - 1) // batch_size)
 results = []
-get_acc = lambda: np.mean([float(j) for j in results.values()])
+def get_acc():
+    score = []
+    for j in results:
+        score.extend(list(j.values()))
+    return np.mean(score)
 
 for start in pbar:
     end = min(start + batch_size, n_samples)
@@ -144,7 +148,7 @@ for start in pbar:
         results.append(res)
 
     pbar.set_postfix(
-        accuracy = round(get_acc(), 6),
+        accuracy = round(get_acc(), 4),
     )
     
 
