@@ -22,9 +22,6 @@ tokenizer.padding_side = "left"
 
 
 def build_adjudicator_prompt(question, prediction, label, question_class, pairs):
-    def qa_format(a):
-        return str(json.loads((a)))
-
     prompt = f"""
 Context:
 QUESTION: {question}
@@ -88,6 +85,7 @@ def parse_json_safe(text):
                 return json.loads(m.group(0))
             except json.JSONDecodeError:
                 pass
+        tqdm.write(str(text))
         return None
 
 
@@ -134,7 +132,8 @@ results = []
 def get_acc():
     score = []
     for j in results:
-        score.extend(list(j.values()))
+        if j is not None:
+            score.extend(list(j.values()))
     return np.mean(score)
 
 
