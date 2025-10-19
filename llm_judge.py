@@ -6,7 +6,7 @@ import sys
 import pandas as pd
 
 config = load_json(sys.argv[1])
-checkpoint = config.get("checkpoint", ModelUtils.get_latest_checkpoint(config['dir']))
+checkpoint = config.get("checkpoint", ModelUtils.get_latest_checkpoint(config["dir"]))
 
 model_name = "Qwen/Qwen3-30B-A3B-Instruct-2507"
 
@@ -14,12 +14,13 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    trust_remote_code = True,
-    device_map = "auto",  
-    dtype = torch.bfloat16,
+    trust_remote_code=True,
+    device_map="auto",
+    dtype=torch.bfloat16,
     # low_cpu_mem_usage = True,
 )
-tokenizer.padding_side = 'left'
+tokenizer.padding_side = "left"
+
 
 def build_adjudicator_prompt(question, prediction, label, question_class, pairs):
     def qa_format(a):
@@ -47,18 +48,18 @@ You are given:
     3. A model's prediction (which was merged and derived from an original set of QA pairs).
     4. The original QA pair set.
     5. Question class, (evaluation aspects)
-    
+
 Your task: Judge how similar each evaluation aspect of the model's prediction is to the correct answer.
 
 Guidelines:
     - Treat related forms like “polyp” and “polypoid” as semantically similar when they refer to the same medical concept.
     - Focus on meaning rather than exact wording or morphology.
     - Ignore stylistic or grammatical differences.
-    - Accept: synonyms, abbreviations, and medically equivalent expressions as similar.
-    - Only consider it dissimilar if the prediction is clearly wrong, contradictory, or unrelated.
+    - Accept synonyms, abbreviations, and medically equivalent expressions as similar.
+    - Consider it dissimilar if the prediction is wrong, contradictory, or unrelated.
     - Assigning a binary score: 1 = similar, 0 = dissimilar.
     - Output JSON only, no extra text.
-    
+
 ---
 OUTPUT JSON FORMAT:
 {{
@@ -66,12 +67,15 @@ OUTPUT JSON FORMAT:
 }}
 """
 
+
 def build_prompt(*args, **kwargs):
     messages = [
         {"role": "system", "content": INSTRUCTION},
         {"role": "user", "content": build_adjudicator_prompt(*args, **kwargs)},
     ]
-    return tokenizer.apply_chat_template(messages, tokenize = False, add_generation_prompt = True)
+    return tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
 
 
 def parse_json_safe(text):
@@ -92,55 +96,60 @@ def parse_json_safe(text):
 def judge_batch(prompts):
     inputs = tokenizer(
         prompts,
-        return_tensors = "pt",
-        padding = True,
-        truncation = False,
+        return_tensors="pt",
+        padding=True,
+        truncation=False,
     )
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     gen_ids = model.generate(
         **inputs,
-        max_new_tokens = 2048,
+        max_new_tokens=2048,
     )
-    gen_ids = gen_ids[::, inputs["input_ids"].shape[-1]::]
+    gen_ids = gen_ids[::, inputs["input_ids"].shape[-1] : :]
 
     outs = []
     for i in range(len(gen_ids)):
         gen_slice = gen_ids[i]
-        text = tokenizer.decode(gen_slice, skip_special_tokens = True).strip()
+        text = tokenizer.decode(gen_slice, skip_special_tokens=True).strip()
         outs.append(parse_json_safe(text))
     return outs
 
 
 df = pd.read_csv("data/test.csv")
 
-reader = ModelUtils.TestLogger.ResultsReader(
-    file_path = config["test_output_file"]
-)
+reader = ModelUtils.TestLogger.ResultsReader(file_path=config["test_output_file"])
 
 labels = list(reader.labels)
-preds  = list(reader.predictions)
+preds = list(reader.predictions)
 
 n_samples = len(labels)
 batch_size = config["batch_size"]
 
-pbar = tqdm(range(0, n_samples, batch_size), total = (n_samples + batch_size - 1) // batch_size)
+pbar = tqdm(
+    range(0, n_samples, batch_size), total=(n_samples + batch_size - 1) // batch_size
+)
 results = []
+
+
 def get_acc():
     score = []
     for j in results:
         score.extend(list(j.values()))
     return np.mean(score)
 
+
 for start in pbar:
     end = min(start + batch_size, n_samples)
-    batch = list(zip(
-        df["question"][start:end:], 
-        preds[start:end:], 
-        labels[start:end:], 
-        df["question_class"][start:end:],
-        df["original"][start:end:],
-    ))
+    batch = list(
+        zip(
+            df["question"][start:end:],
+            preds[start:end:],
+            labels[start:end:],
+            df["question_class"][start:end:],
+            df["original"][start:end:],
+        )
+    )
 
     batch_res = judge_batch([build_prompt(*x) for x in batch])
 
@@ -148,21 +157,20 @@ for start in pbar:
         results.append(res)
 
     pbar.set_postfix(
-        accuracy = round(get_acc(), 4),
+        accuracy=round(get_acc(), 4),
     )
-    
 
-results_df = pd.DataFrame({
-    "img_id": df["img_id"],
-    "question": reader.questions,
-    
-    "label": reader.labels,
-    "prediction": reader.predictions,
-    
-    "judge": results,
 
-    "complexity": df["complexity"],
-    "question_class": df["question_class"],
-})
+results_df = pd.DataFrame(
+    {
+        "img_id": df["img_id"],
+        "question": reader.questions,
+        "label": reader.labels,
+        "prediction": reader.predictions,
+        "judge": results,
+        "complexity": df["complexity"],
+        "question_class": df["question_class"],
+    }
+)
 
-results_df.to_csv(f"{config['dir']}/checkpoint-{checkpoint}-llm-judge.csv", index = False)
+results_df.to_csv(f"{config['dir']}/checkpoint-{checkpoint}-llm-judge.csv", index=False)
