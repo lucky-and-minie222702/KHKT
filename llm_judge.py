@@ -36,17 +36,6 @@ CORRECT LABEL: {label}
 QUESTION CLASS: {question_class}
 
 ORIGNAL QUESTION: {pairs}
-
----
-SCORING RULE:
-Assign a score of 1 if the MODEL PREDICTION correctly and fully addresses the question as verified by the CORRECT LABEL.
-Assign a score of 0 if the MODEL PREDICTION is incorrect, incomplete, or fails to address the core aspect(s) of the question.
-
----
-OUTPUT JSON FORMAT:
-{
-  "<INJECT_QUESTION_CLASS>": "<SCORE_1_OR_0>"
-}
 """
     return prompt
 
@@ -66,7 +55,12 @@ Guidelines:
     - Consider it dissimilar if the prediction is clearly wrong, contradictory, or unrelated.
     - Accept paraphrases, synonyms, or partial overlaps if they preserve the essential ideas.
     - Assigning a binary score: 1 = similar, 0 = dissimilar.
-    - Giving a brief justification for your response.
+    
+---
+OUTPUT JSON FORMAT:
+{
+  "<QUESTION_CLASS>": "<SCORE_1_OR_0>"
+}
 """
 
 def build_prompt(*args, **kwargs):
