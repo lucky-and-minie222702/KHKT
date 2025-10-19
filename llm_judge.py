@@ -171,4 +171,4 @@ results_df = pd.DataFrame(
     }
 )
 
-results_df.to_csv(config.get("output_file", f"{config['dir']}/llm-judge.csv"), index = False)
+results_df.to_csv(config["output_file"], index = False)
