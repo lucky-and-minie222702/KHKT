@@ -38,7 +38,7 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 lora_config = LoraConfig(
     r = 8,
     lora_alpha = 16,
-    target_modules = ["qkv", "proj"],
+    target_modules = ["qkv", "proj", "gate_proj", "down_proj", "up_proj"],
     bias = "none",
 )
 vision_model = get_peft_model(vision_model, lora_config)
@@ -66,8 +66,8 @@ class ImgDataset(Dataset):
         self.paths = [f"{FOLDER}/{p}" for p in os.listdir(FOLDER)]
         self.transform = transforms.Compose([
             transforms.ColorJitter(
-                brightness = 0.1,
-                contrast = 0.1,
+                brightness = 0.15,
+                contrast = 0.15,
             )
         ])
         
@@ -94,7 +94,7 @@ class ImgDataset(Dataset):
         
         
 
-def contrastive_loss(embeddings, temperature = 0.07):
+def contrastive_loss(embeddings, temperature = 0.35):
     def chunked_similarity(embeddings, chunk_size):
         B = embeddings.shape[0]
         sim_matrix = []
@@ -131,19 +131,19 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 
 if __name__ == "__main__":
-    epoch = 50
-    batch_size = 16
-    accum_step = 256
-    log_step = 5
+    epoch = 100
+    batch_size = 5
+    accum_step = 1000
+    log_step = 10
 
     train_ds = ImgDataset()
     train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
     repeated_train_dl = chain.from_iterable([train_dl] * epoch)
     model = CtrModel().to(torch.device("cuda"))
-    optimizer = AdamW(model.parameters(), lr = 5e-5)
+    optimizer = AdamW(model.parameters(), lr = 1e-4)
 
     train_step = (len(train_dl) * epoch) // accum_step
-    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
+    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 2e-6)
     pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 
 
