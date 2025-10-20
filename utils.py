@@ -40,13 +40,13 @@ def mask_padding_in_labels(labels, pad_token_id, ignore_index: int = -100) -> to
 
     is_non_pad = (labels != pad_token_id)
     
-    sequence_lengths = torch.sum(is_non_pad, dim = 1)
+    sequence_lengths = torch.sum(is_non_pad, dim = 0)
 
-    batch_size, seq_len = labels.shape
-    indices = torch.arange(seq_len, device = labels.device).unsqueeze(0).expand(batch_size, seq_len)
+    seq_len = labels.shape[0]
+    indices = torch.arange(seq_len, device = labels.device)
 
-    length_tensor = sequence_lengths.unsqueeze(1)
-    padding_to_mask = (indices >= length_tensor)
+    length_tensor = sequence_lengths
+    padding_to_mask = (indices > length_tensor)
     masked_labels[padding_to_mask] = ignore_index
     
     return masked_labels
