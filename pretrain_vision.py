@@ -162,6 +162,8 @@ if __name__ == "__main__":
         else:
             with torch.no_grad():
                 emb = model(**batch)
+                emb.requires_grad = True
+
         emb = emb.contiguous().view(B, -1, 1280)
         emb = torch.mean(emb, dim = 1)
         
