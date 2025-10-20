@@ -35,7 +35,7 @@ class ModelInterface:
 
         self.processor = self.processor_class.from_pretrained(self.pretrained_name)
         
-    def prepare_before_lora(self):
+        # load pretrain vision
         vision_lora_config = LoraConfig(
             r = 8,
             lora_alpha = 16,
@@ -46,6 +46,9 @@ class ModelInterface:
         vision = get_peft_model(vision, vision_lora_config)
         vision.load_state_dict(torch.load("pretrained_vision.torch"))
         vision.merge_and_unload()
+        
+    def prepare_before_lora(self):
+        pass
         
     def prepare_after_lora(self):
         for p in self.model.model.visual.merger.parameters():

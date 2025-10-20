@@ -9,7 +9,7 @@ config = load_json(sys.argv[1])
 checkpoint = config.get("checkpoint", ModelUtils.get_latest_checkpoint(config['dir']))
 model_path = f"results/{config['dir']}/checkpoint-{checkpoint}"
 
-repo_id = "trietbui/model-kvasir-vqa-x1"
+repo_id = "trietbui/model-PIISE"
 
 api = HfApi()
 api.create_repo(repo_id, repo_type="model", exist_ok=True)
