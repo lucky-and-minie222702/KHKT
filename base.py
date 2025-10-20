@@ -38,10 +38,10 @@ class ModelInterface:
         # load pretrain vision
         print("Load vision encoder")
         vision_lora_config = LoraConfig(
-            r = 8,
-            lora_alpha = 16,
-            target_modules = ["qkv", "proj", "gate_proj", "down_proj", "up_proj"],
-            bias = "none",
+                r = 16,
+                lora_alpha = 16,
+                target_modules = ["qkv"],
+                bias = "none",
         )
         vision = self.model.model.visual
         vision = get_peft_model(vision, vision_lora_config)
