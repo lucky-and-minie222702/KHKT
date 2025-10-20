@@ -321,7 +321,6 @@ class CausalDataset(BaseDataset):
 
         merge["labels"] = label
         merge["labels"] = mask_padding_in_labels(merge["labels"], self.processor.tokenizer.pad_token_id)
-        print(merge["labels"])
             
         return merge
     
