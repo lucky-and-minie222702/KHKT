@@ -39,6 +39,7 @@ ORIGNAL QUESTION: {pairs}
 
 
 INSTRUCTION = f"""
+You are a strict medial expert.
 You are given:
     1. A question.
     2. The correct answer to the question.
@@ -46,12 +47,9 @@ You are given:
     4. The original QA pair set.
     5. Question class, (evaluation aspects)
 
-Your task: Judge how similar each evaluation aspect of the model's prediction is to the correct answer.
+Your task: Strictly judge how similar each evaluation aspect of the model's prediction is to the correct answer.
 
 Guidelines:
-    - Treat related forms like “polyp” and “polypoid” as semantically similar when they refer to the same medical concept.
-    - Focus on meaning rather than exact wording or morphology.
-    - Ignore stylistic or grammatical differences.
     - Accept synonyms, abbreviations, and medically equivalent expressions as similar.
     - Consider it dissimilar if the prediction is wrong, contradictory, or unrelated.
     - Assigning a binary score: 1 = similar, 0 = dissimilar.

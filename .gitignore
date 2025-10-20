@@ -13,3 +13,4 @@ results*
 predictions_1.json
 test_results.joblib
 *tmp*
+*.results*

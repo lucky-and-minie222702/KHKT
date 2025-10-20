@@ -133,67 +133,6 @@ class TextUtils:
                 text += final_char
         return text
 
-    @staticmethod
-    def get_scores(predictions, references):
-        clean_data = [
-            (pred.strip().replace("\n", ""), ref.strip().replace("\n", ""))
-            for pred, ref in zip(predictions, references)
-        ]
-
-        if len(clean_data) == 0:
-            return {
-                "bleu": 0.0,
-                "rouge1": 0.0,
-                "rouge2": 0.0,
-                "rougeL": 0.0,
-                "meteor": 0.0,
-            }
-
-        clean_preds, clean_refs = zip(*clean_data)
-
-        clean_refs_list = [[ref] for ref in clean_refs]
-
-        def compute_bleu_batch(preds, refs):
-            scores = []
-            for p, r in zip(preds, refs):
-                score = sacrebleu.sentence_bleu(p, [r]).score
-                scores.append(score)
-            mean_score = sum(scores) / len(scores)
-            return mean_score / 100
-
-        bleu = compute_bleu_batch(clean_preds, clean_refs)
-
-        # rouge
-        r1_total, r2_total, rl_total = 0, 0, 0
-        for pred, refs in zip(clean_preds, clean_refs_list):
-            ref = refs[0]
-            rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
-            scores = rouge.score(ref, pred)
-            r1_total += scores["rouge1"].fmeasure
-            r2_total += scores["rouge2"].fmeasure
-            rl_total += scores["rougeL"].fmeasure
-        n = len(clean_preds)
-        rouge1 = r1_total / n
-        rouge2 = r2_total / n
-        rougeL = rl_total / n
-
-        # meteor
-        meteor_total = 0
-        for pred, refs in zip(clean_preds, clean_refs_list):
-            meteor_total += meteor_score(
-                [ref.split() for ref in refs],
-                pred.split()
-            )
-        meteor = meteor_total / n
-
-        return {
-            "bleu": bleu,
-            "rouge1": rouge1,
-            "rouge2": rouge2,
-            "rougeL": rougeL,
-            "meteor": meteor
-        }
-
 
 # utils for model
 class ModelUtils:
@@ -280,13 +219,6 @@ class ModelUtils:
     class TestLogger():
         def __init__(self, processor):
             self.processor = processor
-            self.scores = {
-                "bleu": [],
-                "rouge1": [],
-                "rouge2": [],
-                "rougeL": [],
-                "meteor": [],
-            }
             self.outputs = {
                 "questions": [],
                 "predictions": [],
@@ -302,43 +234,15 @@ class ModelUtils:
             self.outputs["predictions"].append(pred)
             self.outputs["labels"].append(label)
 
-            all_scores = {
-                "bleu": [],
-                "rouge1": [],
-                "rouge2": [],
-                "rougeL": [],
-                "meteor": [],
-            }
-
-            for i in range(n_returns):
-                scores = TextUtils.get_scores(pred[::, i], label)
-                for k, v in scores.items():
-                    all_scores[k].append(v)
-
-            for k, v in all_scores.items():
-                self.scores[k].append(v)
 
         def end(self):
             for k, v in self.outputs.items():
                 self.outputs[k] = np.concatenate(v, axis = 0)
 
-            for k, v in self.scores.items():
-                self.scores[k] = np.mean(v, axis = 0)
-
-        @property
-        def cur_scores(self):
-            cur_scores = self.scores.copy()
-            for k, v in cur_scores.items():
-                cur_scores[k] = np.max(
-                    np.mean(v, axis = 0), axis = -1
-                )
-            return cur_scores
-
         @property
         def results(self):
             return {
                 "outputs": self.outputs,
-                "scores": self.scores,
             }
 
         class ResultsReader():
@@ -354,3 +258,6 @@ class ModelUtils:
                 self.questions = np.array(self.questions)
                 self.labels = np.array(self.labels)
                 self.predictions = np.array(self.predictions)
+    
+            # def compute_scores():
+                

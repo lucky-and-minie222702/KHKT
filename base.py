@@ -138,15 +138,11 @@ class ModelInterface:
                     label = label,
                     n_returns = generation_config.get("num_return_sequences", 1),
                 )
-                pbar.set_postfix(**{k: round(v, 3) for k, v in logger.cur_scores.items()})
         
         logger.end()
 
         if output_dir is not None:
             joblib.dump(logger.results, f"{output_dir}/test.results")
-            
-        for k, v in logger.scores.items():
-            print(f"{k}: {np.mean(v):.4f}")
 
         return logger
 
