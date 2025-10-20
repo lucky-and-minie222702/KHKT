@@ -40,7 +40,7 @@ class ModelInterface:
         vision_lora_config = LoraConfig(
             r = 8,
             lora_alpha = 16,
-            target_modules = ["qkv", "proj"],
+            target_modules = ["qkv", "proj", "gate_proj", "down_proj", "up_proj"],
             bias = "none",
         )
         vision = self.model.model.visual
