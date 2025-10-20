@@ -168,9 +168,9 @@ if __name__ == "__main__":
         emb = torch.mean(emb, dim = 1)
         
         if step % accum_step == 0:
-            all_logits.append(emb.detach())
-        else:
             all_logits.append(emb)
+        else:
+            all_logits.append(emb.detach())
 
         if step % accum_step == 0:
             update_step += 1
