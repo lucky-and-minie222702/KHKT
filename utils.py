@@ -35,6 +35,22 @@ def find_subsequence(input_ids, pattern):
             return i
     return None
 
+def mask_padding_in_labels(labels, pad_token_id, ignore_index: int = -100) -> torch.Tensor:
+    masked_labels = labels.clone()
+
+    is_non_pad = (labels != pad_token_id)
+    
+    sequence_lengths = torch.sum(is_non_pad, dim = 1)
+
+    batch_size, seq_len = labels.shape
+    indices = torch.arange(seq_len, device = labels.device).unsqueeze(0).expand(batch_size, seq_len)
+
+    length_tensor = sequence_lengths.unsqueeze(1)
+    padding_to_mask = (indices >= length_tensor)
+    masked_labels[padding_to_mask] = ignore_index
+    
+    return masked_labels
+
 def get_dataloader(dataset, batch_size, shuffle = True):
     def collate_fn(batch):
         return {
