@@ -94,7 +94,7 @@ class ImgDataset(Dataset):
         
         
 
-def contrastive_loss(embeddings, temperature = 0.35):
+def contrastive_loss(embeddings, temperature = 0.1):
     def chunked_similarity(embeddings, chunk_size):
         B = embeddings.shape[0]
         sim_matrix = []
@@ -140,10 +140,10 @@ if __name__ == "__main__":
     train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
     repeated_train_dl = chain.from_iterable([train_dl] * epoch)
     model = CtrModel().to(torch.device("cuda"))
-    optimizer = AdamW(model.parameters(), lr = 1e-4)
+    optimizer = AdamW(model.parameters(), lr = 5e-5)
 
     train_step = (len(train_dl) * epoch) // accum_step
-    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 2e-6)
+    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
     pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 
 
