@@ -112,7 +112,7 @@ for i in pbar:
     })
     
 for k, v in res.items():
-    print(k, np.mean(vc))
+    print(k, np.mean(v))
 
 joblib.dump(res, "check_scores.results")
         
