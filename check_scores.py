@@ -74,7 +74,7 @@ def get_scores(predictions, references):
     }
     
 def get_res(i):
-    refs = df[df["original"] == df["original"][i]]["label"].tolist()
+    refs = df[df["original"] == df["original"][i]]["label"].tolist()[0]
     pred = df["prediction"][i]
     res = {
         "bleu": [0],
@@ -112,7 +112,7 @@ for i in pbar:
     })
     
 for k, v in res.items():
-    print(k, np.mean(v))
+    print(k, np.mean(vc))
 
 joblib.dump(res, "check_scores.results")
         
