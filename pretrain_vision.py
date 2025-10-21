@@ -187,9 +187,8 @@ if __name__ == "__main__":
             
             his.append(loss.item())
             
-            if loss.item() < min(his) or len(his) == 1:
-                best_state_dict = deepcopy(model.encoder.state_dict())
-                torch.save(best_state_dict, "pretrained_vision.torch")
+            best_state_dict = deepcopy(model.encoder.state_dict())
+            torch.save(best_state_dict, "pretrained_vision.torch")
             
             if update_step % log_step == 0:
                 tqdm.write(f"Step: {step // accum_step}, loss: {np.mean(his[-log_step::])}, lr: {optimizer.param_groups[0]['lr']}")
