@@ -36,8 +36,8 @@ processor = Qwen2_5_VLProcessor.from_pretrained(
 
 
 lora_config = LoraConfig(
-    r = 16,
-    lora_alpha = 16,
+    r = 8,
+    lora_alpha = 8,
     target_modules = ["qkv"],
     bias = "none",
 )
@@ -94,7 +94,7 @@ class ImgDataset(Dataset):
         
         
 
-def contrastive_loss(embeddings, temperature = 0.07):
+def contrastive_loss(embeddings, temperature = 0.08):
     def chunked_similarity(embeddings, chunk_size):
         B = embeddings.shape[0]
         sim_matrix = []
@@ -132,18 +132,18 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 if __name__ == "__main__":
     epoch = 100
-    batch_size = 50
-    accum_step = 100
+    batch_size = 100
+    accum_step = 50
     log_step = 10
 
     train_ds = ImgDataset()
     train_dl = get_dataloader(train_ds, batch_size = batch_size, shuffle = True)
     repeated_train_dl = chain.from_iterable([train_dl] * epoch)
     model = CtrModel().to(torch.device("cuda"))
-    optimizer = AdamW(model.parameters(), lr = 5e-5)
+    optimizer = AdamW(model.parameters(), lr = 1e-4)
 
     train_step = (len(train_dl) * epoch) // accum_step
-    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
+    lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 1e-4, 1e-6)
     pbar = tqdm(repeated_train_dl, total = len(train_dl) * epoch, ncols = 100)
 
 
