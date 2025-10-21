@@ -90,7 +90,7 @@ def get_res(i):
             res[k].append(v)
             
     for k, v in res.items():
-        res[k] = np.mean(v)
+        res[k] = np.max(v)
     
     return res
 
