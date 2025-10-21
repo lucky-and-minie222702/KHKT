@@ -144,9 +144,9 @@ if __name__ == "__main__":
     model = CtrModel().to(torch.device("cuda"))
     optimizer = AdamW(model.parameters(), lr = 5e-5)
 
-    train_step = 50_000 / (batch_size * accum_step)
+    train_step = 50_000 // (batch_size * accum_step)
     lr_scheduler = get_linear_schedule_with_end(optimizer, train_step, 5e-5, 1e-6)
-    pbar = tqdm(repeated_train_dl, total = (50_000 / batch_size) * epoch, ncols = 100)
+    pbar = tqdm(repeated_train_dl, total = (50_000 // batch_size) * epoch, ncols = 100)
 
 
     his = []
