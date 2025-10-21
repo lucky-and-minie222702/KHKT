@@ -60,7 +60,7 @@ class ModelInterface:
         inputs = []
         outputs = []
         labels = []
-        
+        model.eval()
         with torch.no_grad():
             for batch in tqdm(dl):
                 batch = {k: v.to(self.model.device) for k, v in batch.items()}
@@ -88,7 +88,7 @@ class ModelInterface:
     
     def get_loss(self, dl):
         losses = []
-        
+        model.eval()        
         with torch.no_grad():
             pbar = tqdm(dl)
             for batch in pbar:
@@ -111,7 +111,7 @@ class ModelInterface:
             }
 
         logger = ModelUtils.TestLogger(self.processor)
-        
+        model.eval()
         with torch.no_grad():
             pbar = tqdm(dl)
             for batch in pbar:
