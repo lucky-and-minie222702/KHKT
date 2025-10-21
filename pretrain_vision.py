@@ -139,7 +139,7 @@ if __name__ == "__main__":
     train_ds = ImgDataset()
     repeated_train_dl = chain.from_iterable(
         get_dataloader(train_ds, batch_size = batch_size, shuffle = True) 
-        for _ in epoch
+        for _ in range(epoch)
     )
     model = CtrModel().to(torch.device("cuda"))
     optimizer = AdamW(model.parameters(), lr = 5e-5)
