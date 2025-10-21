@@ -131,7 +131,7 @@ def get_linear_schedule_with_end(optimizer, num_training_steps, lr_start, lr_end
 
 
 if __name__ == "__main__":
-    epoch = 100
+    epoch = 200
     batch_size = 50
     accum_step = 100
     log_step = 10
