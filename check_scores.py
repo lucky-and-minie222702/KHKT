@@ -74,7 +74,7 @@ def get_scores(predictions, references):
     }
     
 def get_res(i):
-    refs = df[df["original"] == df["original"][i]]["label"].tolist()[0]
+    refs = df[df["original"] == df["original"][i]]["label"].tolist()
     pred = df["prediction"][i]
     res = {
         "bleu": [0],
@@ -90,7 +90,7 @@ def get_res(i):
             res[k].append(v)
             
     for k, v in res.items():
-        res[k] = np.max(v)
+        res[k] = np.mean(v)
     
     return res
 
