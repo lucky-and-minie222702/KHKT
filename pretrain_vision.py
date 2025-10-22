@@ -31,7 +31,8 @@ vision_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
 vision_model.to(torch.device("cuda"))
 processor = Qwen2_5_VLProcessor.from_pretrained(
     pretrained_name, 
-    trust_remote_code = True
+    trust_remote_code = True,
+    attn_implementation = "flash_attention_2",
 )
 
 
