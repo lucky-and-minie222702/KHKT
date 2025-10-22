@@ -27,7 +27,8 @@ class ModelInterface:
             pretrained_name,
             dtype = torch.bfloat16,
             # device_map = "auto",
-            trust_remote_code = True
+            trust_remote_code = True,
+            attn_implementation = "flash_attention_2",
         )
         for name, param in self.model.named_parameters():
             param.requires_grad = False
