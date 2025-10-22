@@ -275,5 +275,4 @@ class ModelUtils:
                 self.labels = np.array(self.labels)
                 self.predictions = np.array(self.predictions)
     
-            # def compute_scores():
-                
+            # def compute_scores():     

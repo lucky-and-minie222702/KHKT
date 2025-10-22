@@ -7,7 +7,6 @@ from utils import *
 from torch.utils.data import Dataset
 from qwen_vl_utils import process_vision_info
 
-
 class ModelInterface:
     def __init__(
         self, 
