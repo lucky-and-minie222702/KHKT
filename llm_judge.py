@@ -22,52 +22,56 @@ model = AutoModelForCausalLM.from_pretrained(
 tokenizer.padding_side = "left"
 
 
-def build_adjudicator_prompt(question, prediction, label, question_class, pairs):
-    prompt = f"""
-Context:
-QUESTION: {question}
-
-MODEL PREDICTION: {prediction}
-
-CORRECT LABEL: {label}
-
-QUESTION CLASS: {question_class}
-
-ORIGNAL QUESTION: {pairs}
-"""
-    return prompt
-
-
-INSTRUCTION = f"""
-You are a strict medial expert.
-You are given:
-    1. A question.
-    2. The correct answer to the question.
-    3. A model's prediction (which was merged and derived from an original set of QA pairs).
-    4. The original QA pair set.
-    5. Question class, (evaluation aspects)
-
-Your task: Strictly judge how similar each evaluation aspect of the model's prediction is to the correct answer.
-
-Guidelines:
-    - Accept synonyms, abbreviations, and medically equivalent expressions as similar.
-    - Consider it dissimilar if the prediction is wrong, contradictory, or unrelated.
-    - Assigning a binary score: 1 = similar, 0 = dissimilar.
-    - Output JSON only, no extra text.
+def build_adjudicator_prompt(question, model_response, complexity, question_class, original, answer):
+    # Ensure iterable
+    question_class = list(question_class) if isinstance(question_class, (list, tuple)) else [str(question_class)]
+    aspects_json = ",\n".join([
+        f'    "{aspect}": {{\n      "score": 0 or 1,\n      "reason": "<short justification>"\n    }}'
+        for aspect in question_class
+    ])
+    return f""" 
+## CONTEXT
+The current **exam question** is derived from one or more original Q/A items (see `original`) and may vary in complexity. It has been annotated with one or more **aspect labels** (see `question_class`), where each label represents a specific area of clinical knowledge (e.g., diagnosis, treatment, anatomy, procedures, interpretation, etc.).
 
 ---
-OUTPUT JSON FORMAT:
+
+## TASK
+Your job is to **grade the doctor’s response** against each individual aspect.
+
+For **each aspect** in `question_class`, you must:
+- Compare the **doctor's response** to the **correct answer**.
+- Use the **original Q/A pairs** for supporting context.
+- Assign:
+  - `\\"score\\": 1` if the response fully and correctly addresses that aspect.
+  - `\\"score\\": 0` if the response is partially correct, incorrect, missing, or misinterprets that aspect.
+- Give a **short reason** for the score.
+
+---
+
+## OUTPUT FORMAT (STRICT)
+Return a **valid JSON object** where:
+- Each key is one aspect label from `question_class`.
+- Each value is a dictionary with `\\"score\\"` and `\\"reason\\"`.
+- The entire JSON must be wrapped in triple backticks with `json` as the language identifier.
+- No extra comments, text, or output outside the code block.
+
+**Template:**
+```json
 {{
-  "<QUESTION_CLASS>": score (0 or 1),
-  "<QUESTION_CLASS>": score (0 or 1),
-  ...
+{aspects_json}
 }}
-"""
+Input:
+Exam Question: {question}
+Doctor’s Response: {model_response}
+Correct Answer: {answer}
+Question Complexity Level: {complexity}
+Original Q/A Reference: {original}
+Evaluation Aspects: {question_class}
+""".strip()
 
 
 def build_prompt(*args, **kwargs):
     messages = [
-        {"role": "system", "content": INSTRUCTION},
         {"role": "user", "content": build_adjudicator_prompt(*args, **kwargs)},
     ]
     return tokenizer.apply_chat_template(
@@ -133,8 +137,7 @@ results = []
 def get_acc():
     score = []
     for j in results:
-        if j is not None:
-            score.extend(list(j.values()))
+        score.append(j["score"])
     return np.mean(score)
 
 
@@ -144,9 +147,10 @@ for start in pbar:
         zip(
             df["question"][start:end:],
             preds[start:end:],
-            labels[start:end:],
-            df["question_class"][start:end:],
+            df["complexity"][start:end:],
             df["original"][start:end:],
+            df["question_class"][start:end:],
+            labels[start:end:],
         )
     )
 
@@ -156,7 +160,7 @@ for start in pbar:
         results.append(res)
 
     pbar.set_postfix(
-        accuracy=round(get_acc(), 4),
+        accuracy = round(get_acc(), 4),
     )
 
 
