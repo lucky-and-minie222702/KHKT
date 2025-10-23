@@ -20,6 +20,7 @@ df["original"] = pd.read_csv("data/test.csv")["original"]
 def get_scores(pred, refs):
     clean_pred = pred.strip().replace("\n", "")
     clean_refs = [ref.strip().replace("\n", "") for ref in refs]
+    n = len(clean_refs)
 
     # bleu
     bleu = sacrebleu.sentence_bleu(clean_pred, clean_refs).score / 100
@@ -27,10 +28,15 @@ def get_scores(pred, refs):
     # rouge
     r1_total, r2_total, rl_total = 0, 0, 0
     rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
-    scores = rouge.score(clean_refs, clean_pred)
-    rouge1 = scores["rouge1"].fmeasure
-    rouge2 = scores["rouge2"].fmeasure
-    rougeL = scores["rougeL"].fmeasure
+    for ref in clean_refs:
+        scores = rouge.score(ref, clean_pred)
+        r1_toal += scores["rouge1"].fmeasure
+        r2_total += scores["rouge2"].fmeasure
+        rl_total += scores["rougeL"].fmeasure
+        
+    rouge1 = r1_total / n
+    rouge2 = r2_total / n
+    rougeL = rl_total / n
 
     # meteor
     meteor = meteor_score(
