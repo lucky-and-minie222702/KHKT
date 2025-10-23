@@ -139,7 +139,8 @@ results = []
 def get_acc():
     score = []
     for j in results:
-        score.append(j["score"])
+        for aspect, res in j.items():
+            score.append(res["score"])
     return np.mean(score)
 
 
@@ -150,8 +151,8 @@ for start in pbar:
             df["question"][start:end:],
             preds[start:end:],
             df["complexity"][start:end:],
-            df["original"][start:end:],
             df["question_class"][start:end:],
+            df["original"][start:end:],
             labels[start:end:],
         )
     )
