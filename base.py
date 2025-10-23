@@ -35,7 +35,7 @@ class ModelInterface:
 
         self.processor = self.processor_class.from_pretrained(self.pretrained_name)
         
-        load pretrain vision
+        # load pretrain vision
         print("Load vision encoder")
         vision_lora_config = LoraConfig(
                 r = 16,
