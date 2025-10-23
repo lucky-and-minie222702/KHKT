@@ -35,18 +35,18 @@ class ModelInterface:
 
         self.processor = self.processor_class.from_pretrained(self.pretrained_name)
         
-        # load pretrain vision
-        # print("Load vision encoder")
-        # vision_lora_config = LoraConfig(
-        #         r = 16,
-        #         lora_alpha = 16,
-        #         target_modules = ["qkv"],
-        #         bias = "none",
-        # )
-        # vision = self.model.model.visual
-        # vision = get_peft_model(vision, vision_lora_config)
-        # vision.load_state_dict(torch.load("pretrained_vision.torch"))
-        # vision.merge_and_unload()
+        load pretrain vision
+        print("Load vision encoder")
+        vision_lora_config = LoraConfig(
+                r = 16,
+                lora_alpha = 16,
+                target_modules = ["qkv"],
+                bias = "none",
+        )
+        vision = self.model.model.visual
+        vision = get_peft_model(vision, vision_lora_config)
+        vision.load_state_dict(torch.load("pretrained_vision.torch"))
+        vision.merge_and_unload()
         
     def to_lora(self, **kwargs):
         lora_config = LoraConfig(**kwargs)
