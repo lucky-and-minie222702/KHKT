@@ -17,52 +17,30 @@ df = pd.DataFrame({
 })
 df["original"] = pd.read_csv("data/test.csv")["original"]
 
-def get_scores(predictions, references):
-    clean_data = [
-        (pred.strip().replace("\n", ""), ref.strip().replace("\n", ""))
-        for pred, ref in zip(predictions, references)
-    ]
+def get_scores(pred, refs):
+    clean_pred = pred.strip().replace("\n", "")
+    clean_refs = [ref.strip().replace("\n", "") for ref in refs]
 
-    clean_preds, clean_refs = zip(*clean_data)
-
-    clean_refs_list = [[ref] for ref in clean_refs]
-
-    def compute_bleu_batch(preds, refs):
-        scores = []
-        for p, r in zip(preds, refs):
-            score = sacrebleu.sentence_bleu(p, [r]).score
-            scores.append(score)
-        mean_score = sum(scores) / len(scores)
-        return mean_score / 100
-
-    bleu = compute_bleu_batch(clean_preds, clean_refs)
+    # bleu
+    bleu = sacrebleu.sentence_bleu(clean_pred, clean_refs).score / 100
 
     # rouge
     r1_total, r2_total, rl_total = 0, 0, 0
-    for pred, refs in zip(clean_preds, clean_refs_list):
-        ref = refs[0]
-        rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
-        scores = rouge.score(ref, pred)
-        r1_total += scores["rouge1"].fmeasure
-        r2_total += scores["rouge2"].fmeasure
-        rl_total += scores["rougeL"].fmeasure
-    n = len(clean_preds)
-    rouge1 = r1_total / n
-    rouge2 = r2_total / n
-    rougeL = rl_total / n
+    rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
+    scores = rouge.score(clean_refs, clean_pred)
+    rouge1 = scores["rouge1"].fmeasure
+    rouge2 = scores["rouge2"].fmeasure
+    rougeL = scores["rougeL"].fmeasure
 
     # meteor
-    meteor_total = 0
-    for pred, refs in zip(clean_preds, clean_refs_list):
-        meteor_total += meteor_score(
-            [ref.split() for ref in refs],
-            pred.split()
-        )
-    meteor = meteor_total / n
+    meteor = meteor_score(
+        [ref.split() for ref in refs],
+        pred.split()
+    )
     
     # chrf++
     chrf_scorer = sacrebleu.metrics.CHRF(char_order = 6, word_order = 2, beta = 2)
-    chrf = chrf_scorer.corpus_score(predictions, [references]).score / 100
+    chrf = chrf_scorer.sentence_score(clean_pred, clean_refs).score
 
     return {
         "bleu": bleu,
@@ -76,23 +54,8 @@ def get_scores(predictions, references):
 def get_res(i):
     refs = df[df["original"] == df["original"][i]]["label"].tolist()
     pred = df["prediction"][i]
-    res = {
-        "bleu": [0],
-        "rouge1": [0],
-        "rouge2": [0],
-        "rougeL": [0],
-        "meteor": [0],
-        "chrf++": [0],
-    }
-    for ref in refs:
-        scores = get_scores([pred], [ref])
-        for k, v in scores.items():
-            res[k].append(v)
-            
-    for k, v in res.items():
-        res[k] = np.max(v)
-    
-    return res
+    scores = get_scores(pred, refs)    
+    return scores
 
 res = {
     "bleu": [0],
