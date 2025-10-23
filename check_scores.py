@@ -23,7 +23,12 @@ def get_scores(pred, refs):
     n = len(clean_refs)
 
     # bleu
-    bleu = sacrebleu.sentence_bleu(clean_pred, clean_refs).score / 100
+    bleu = sacrebleu.sentence_bleu(
+        clean_pred, clean_refs,
+        smooth_method = "exp",
+        tokenize = "intl",
+        lowercase = False
+    ).score / 100
 
     # rouge
     r1_total, r2_total, rl_total = 0, 0, 0
