@@ -30,13 +30,13 @@ def get_scores(pred, refs):
     rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
     for ref in clean_refs:
         scores = rouge.score(ref, clean_pred)
-        r1_total += scores["rouge1"].fmeasure
-        r2_total += scores["rouge2"].fmeasure
-        rl_total += scores["rougeL"].fmeasure
+        r1_total = max(r1_total, scores["rouge1"].fmeasure)
+        r2_total = max(r2_total, scores["rouge2"].fmeasure)
+        rl_total = max(rl_total, scores["rougeL"].fmeasure)
         
-    rouge1 = r1_total / n
-    rouge2 = r2_total / n
-    rougeL = rl_total / n
+    rouge1 = r1_total
+    rouge2 = r2_total
+    rougeL = rl_total
 
     # meteor
     meteor = meteor_score(
