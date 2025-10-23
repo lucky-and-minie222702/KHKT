@@ -22,12 +22,16 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 tokenizer.padding_side = "left"
 
+def parse_array_string(s):
+    s = s.strip()[1:-1].strip()
+    items = [x.strip("'\"") for x in s.split() if x]
+    return items
 
 def build_adjudicator_prompt(question, model_response, complexity, question_class, original, answer):
     # Ensure iterable
-    question_class = list(question_class) if isinstance(question_class, (list, tuple)) else [str(question_class)]
+    question_class = parse_array_string(question_class)
     aspects_json = ",\n".join([
-        f'    "{aspect}": {{\n      "score": 0 or 1,\n      "reason": "<short justification>"\n    }}'
+        f'    "{aspect}": {{\n      "score": 0 or 1,\n      }}'
         for aspect in question_class
     ])
     return f""" 
@@ -45,8 +49,6 @@ For **each aspect** in `question_class`, you must:
 - Assign:
   - `\\"score\\": 1` if the response fully and correctly addresses that aspect.
   - `\\"score\\": 0` if the response is partially correct, incorrect, missing, or misinterprets that aspect.
-- Give a **short reason** for the score.
-
 ---
 
 ## OUTPUT FORMAT (STRICT)
@@ -107,7 +109,7 @@ def judge_batch(prompts):
 
     gen_ids = model.generate(
         **inputs,
-        max_new_tokens = 2048,
+        max_new_tokens = 512,   
     ) 
     gen_ids = gen_ids[::, inputs["input_ids"].shape[-1] : :]
 
