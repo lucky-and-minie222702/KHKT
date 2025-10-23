@@ -54,7 +54,7 @@ For **each aspect** in `question_class`, you must:
 ## OUTPUT FORMAT (STRICT)
 Return a **valid JSON object** where:
 - Each key is one aspect label from `question_class`.
-- Each value is a dictionary with `\\"score\\"` and `\\"reason\\"`.
+- Each value is a dictionary with `\\"score\\"`.
 - The entire JSON must be wrapped in triple backticks with `json` as the language identifier.
 - No extra comments, text, or output outside the code block.
 
