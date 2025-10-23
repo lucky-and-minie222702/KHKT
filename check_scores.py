@@ -27,7 +27,7 @@ def get_scores(pred, refs):
 
     # rouge
     r1_total, r2_total, rl_total = 0, 0, 0
-    rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer = True)
+    rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'])
     for ref in clean_refs:
         scores = rouge.score(ref, clean_pred)
         r1_total = max(r1_total, scores["rouge1"].fmeasure)
