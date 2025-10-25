@@ -3,6 +3,7 @@ from transformers import Trainer, TrainingArguments
 from transformers import TrainerCallback
 from tqdm import tqdm
 from os import path
+import os
 
 class TrainingEnvironment:
     def __init__(
@@ -102,6 +103,7 @@ class TrainingEnvironment:
                     ModelUtils.GpuUsageCallback(),
                 ],
             )
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             print(f"GPUS: {self.trainer.args.n_gpu}")
             
             self.trainer.train()
