@@ -89,7 +89,8 @@ class TrainingEnvironment:
             
             if logs_output_file is None:
                 logs_output_file = path.join(self.training_arguments.output_dir, "logs.json")
-            
+
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             self.trainer = Trainer(
                 model = self.model_interface.model,
                 args = self.training_arguments,
@@ -103,7 +104,6 @@ class TrainingEnvironment:
                     ModelUtils.GpuUsageCallback(),
                 ],
             )
-            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             print(f"GPUS: {self.trainer.args.n_gpu}")
             
             self.trainer.train()
