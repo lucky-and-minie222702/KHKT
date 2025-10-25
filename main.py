@@ -1,5 +1,7 @@
 from config import *
 import sys
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 conf = load_json(sys.argv[1])
 

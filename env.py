@@ -3,7 +3,6 @@ from transformers import Trainer, TrainingArguments
 from transformers import TrainerCallback
 from tqdm import tqdm
 from os import path
-import os
 
 class TrainingEnvironment:
     def __init__(
@@ -90,7 +89,6 @@ class TrainingEnvironment:
             if logs_output_file is None:
                 logs_output_file = path.join(self.training_arguments.output_dir, "logs.json")
 
-            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             self.trainer = Trainer(
                 model = self.model_interface.model,
                 args = self.training_arguments,
