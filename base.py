@@ -43,35 +43,53 @@ class ModelInterface:
 
         self.model = get_peft_model(self.model, lora_config)
         
-    def infer(self, dl, returns =  ["output"], generation_config = {}):
-        inputs = []
-        outputs = []
-        labels = []
+    def infer(self, image, question, generation_config = {}):
+        inp_mes = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": INSTRUCTION,
+                    }
+                ]
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "image": image,
+                    },
+                    {
+                        "type": "text",
+                        "text": question,
+                    }
+                ]
+            }
+        ]
+        processed_image, _ = process_vision_info(inp_mes)
+        inp_text = self.processor.apply_chat_template(inp_mes, tokenize = False, add_generation_prompt = True)
+        inp = self.processor(
+            text = inp_text,
+            images = processed_image,
+            return_tensors = "pt"
+        )
+        
+        
+        output = None
         self.model.eval()
         with torch.no_grad():
-            for batch in tqdm(dl):
-                batch = {k: v.to(self.model.device) for k, v in batch.items()}
-                
-                output = self.model.generate(
-                    **batch,
-                    **generation_config
-                )
-                
-                if "input" in returns:
-                    inputs.append(batch["input_ids"])
-                
-                if "output" in returns:
-                    outputs.append(output)
-                    
-                    
-                if "label" in batch:
-                    if "label" in returns:
-                        labels.append(batch["labels"])
-                    
-                label = batch["labels"]   
-                label[label == -100] == self.processor.tokenizer.pad_token_id
+            inp = {k: v.to(self.model.device) for k, v in inp.items()}
+            
+            output = self.model.generate(
+                **inp,
+                **generation_config
+            )
+            output = ModelUtils.get_sentences_from_ids(self.processor, output, to_numpy = True)
+            output = np.squeeze(output).tolist()
         
-        return inputs, outputs, labels
+        return output
     
     def get_loss(self, dl):
         losses = []
@@ -131,13 +149,6 @@ class ModelInterface:
 
         return logger
 
-
-# INSTRUCTION = (
-#     "You are a medical vision-language assistant; given an endoscopic image and a clinical "
-#     "question that may ask about one or more findings, provide a concise, clinically accurate "
-#     "response addressing all parts of the question in natural-sounding medical language as if "
-#     "spoken by a doctor in a single sentence."
-# )
 
 INSTRUCTION = "You are a medical vision assistant about gastroIntestinal image"
 
