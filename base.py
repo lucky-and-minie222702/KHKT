@@ -26,7 +26,7 @@ class ModelInterface:
         self.model = self.model_class.from_pretrained(
             pretrained_name,
             dtype = torch.bfloat16,
-            # device_map = "auto",
+            device_map = "auto",
             trust_remote_code = True,
             attn_implementation = "flash_attention_2",
         )
