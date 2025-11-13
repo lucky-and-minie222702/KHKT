@@ -38,8 +38,8 @@ class ModelInterface:
     def to_lora(self, **kwargs):
         lora_config = LoraConfig(**kwargs)
         
-        for p in self.model.model.visual.merger.parameters():
-            p.requires_grad = True
+        # for p in self.model.model.visual.merger.parameters():
+        #     p.requires_grad = True
 
         self.model = get_peft_model(self.model, lora_config)
         
