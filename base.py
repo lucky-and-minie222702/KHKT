@@ -2,7 +2,6 @@ import torch
 from peft import LoraConfig, get_peft_model
 from transformers import AutoModel, AutoProcessor
 from tqdm import tqdm
-from yaml import Node
 from utils import *
 from torch.utils.data import Dataset
 from qwen_vl_utils import process_vision_info

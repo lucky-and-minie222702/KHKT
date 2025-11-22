@@ -4,7 +4,6 @@ from utils import *
 import re
 import sys
 import pandas as pd
-from accelerate import init_empty_weights, load_checkpoint_and_dispatch
 
 config = load_json(sys.argv[1])
 
