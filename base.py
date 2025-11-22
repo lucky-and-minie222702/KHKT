@@ -116,6 +116,9 @@ class ModelInterface:
             )
             output = ModelUtils.get_sentences_from_ids(self.processor, output, to_numpy = True)
             output = np.squeeze(output).tolist()
+            
+        output = output[output.rfind("assistant\n")+10::]
+        output = output.strip()
         
         return output
     
