@@ -43,29 +43,29 @@ class ModelInterface:
         self.model = get_peft_model(self.model, lora_config)
         
     def infer(self, image, question, generation_config = {}, history = None):
-        # formatted_history = []
-        # if history is not None:
-        #     for assistant, user in history:
-        #         formatted_history.extend([
-        #             {
-        #                 "role": "assistant",
-        #                 "content": [
-        #                     {
-        #                         "type": "text",
-        #                         "text": assistant,
-        #                     }
-        #                 ]
-        #             },
-        #             {
-        #                 "role": "user",
-        #                 "content": [
-        #                     {
-        #                         "type": "text",
-        #                         "text": user,
-        #                     }
-        #                 ]
-        #             }
-        #         ])
+        formatted_history = []
+        if history is not None:
+            for user, assistant in history:
+                formatted_history.extend([
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": user,
+                            }
+                        ]
+                    },
+                    {
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": assistant,
+                            }
+                        ]
+                    },
+                ])
         
         inp_mes = [
             {
@@ -85,6 +85,7 @@ class ModelInterface:
                         "image": image,
                     }]
             },
+            *formatted_history,
             {
                 "role": "user",
                 "content": [
