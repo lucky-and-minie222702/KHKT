@@ -174,6 +174,7 @@ class ModelInterface:
                     label = label,
                     n_returns = generation_config.get("num_return_sequences", 1),
                 )
+                pbar.set_description(time = f"{np.mean(time):.6f}")
         
         logger.end()
 
