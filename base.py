@@ -158,10 +158,10 @@ class ModelInterface:
                 label = batch.pop("labels")
                 label[label == -100] == self.processor.tokenizer.pad_token_id
                 
-                wrapped_output = self.model.generate(
+                wrapped_output = timer_wrap(self.model.generate(
                     **batch,
                     **generation_config,
-                )
+                ))
                 output = wrapped_output["output"]
                 time.append(wrapped_output["time"])
                 
