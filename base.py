@@ -163,7 +163,7 @@ class ModelInterface:
                     **generation_config,
                 ))
                 output = wrapped_output["output"]
-                time.append(wrapped_output["time"])
+                time.append(wrapped_output["time"] / input.shape[0])
                 
                 if format_data_fn is not None:
                     input, output, label = format_data_fn(self.processor, batch, input, output, label)
