@@ -121,12 +121,13 @@ class TrainingEnvironment:
                 batch_size = test_batch_size,
             )
             
-            res = self.model_interface.test(
+            logger, time = self.model_interface.test(
                 dl = test_dl,
                 output_dir = None,
                 generation_config = generation_conf,
                 format_data_fn = format_data_fn,
-            ).results
+            )
+            res = logger.results
             
             self.model_interface.processor.tokenizer.padding_side = 'right'
             
@@ -137,7 +138,10 @@ class TrainingEnvironment:
                 batch_size = test_batch_size,
             )
             res["loss"] = self.model_interface.get_loss(test_dl)
+            res["time"] = time
             
             if test_output_file is None:
                 test_output_file = path.join(self.training_arguments.output_dir, "test.results")
             joblib.dump(res, f"{test_output_file}")
+            
+            print(f"Mean inference time: {np.mean(time):.6f}s")

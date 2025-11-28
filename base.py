@@ -6,6 +6,7 @@ from utils import *
 from torch.utils.data import Dataset
 from qwen_vl_utils import process_vision_info
 
+
 class ModelInterface:
     def __init__(
         self, 
@@ -142,6 +143,8 @@ class ModelInterface:
             generation_config = {
                 "do_sample": False,
             }
+            
+        time = []
 
         logger = ModelUtils.TestLogger(self.processor)
         self.model.eval()
@@ -155,10 +158,12 @@ class ModelInterface:
                 label = batch.pop("labels")
                 label[label == -100] == self.processor.tokenizer.pad_token_id
                 
-                output = self.model.generate(
+                wrapped_output = self.model.generate(
                     **batch,
                     **generation_config,
                 )
+                output = wrapped_output["output"]
+                time.append(wrapped_output["time"])
                 
                 if format_data_fn is not None:
                     input, output, label = format_data_fn(self.processor, batch, input, output, label)
@@ -175,7 +180,7 @@ class ModelInterface:
         if output_dir is not None:
             joblib.dump(logger.results, f"{output_dir}/test.results")
 
-        return logger
+        return logger, time
 
 
 INSTRUCTION = "You are a medical vision assistant about gastroIntestinal image"

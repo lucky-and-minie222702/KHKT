@@ -17,6 +17,17 @@ from torch.utils.data import DataLoader
 from transformers import Trainer
 from tqdm import tqdm
 import pynvml
+import time
+
+
+def timer_wrap(f):
+    start_time = time.perf_counter()
+    out = f()
+    end_time = time.perf_counter()
+    return {
+        "time": end_time - start_time,
+        "output": out,
+    }
 
 
 class DFDistributor:
