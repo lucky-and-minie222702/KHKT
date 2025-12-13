@@ -12,7 +12,8 @@ class ModelInterface:
         self, 
         pretrained_name, 
         model_class = None, 
-        processor_class = None
+        processor_class = None,
+        attn_implementation = "flash_attention_2",
     ):  
         self.pretrained_name = pretrained_name
         self.model_class = model_class
@@ -28,7 +29,7 @@ class ModelInterface:
             dtype = torch.bfloat16,
             device_map = "auto",
             trust_remote_code = True,
-            attn_implementation = "flash_attention_2",
+            attn_implementation = attn_implementation,
         )
         for name, param in self.model.named_parameters():
             param.requires_grad = False
