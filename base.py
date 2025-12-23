@@ -205,6 +205,8 @@ class BaseDataset(Dataset):
         super().__init__()
         self.processor = processor
         self.mode = mode
+        self.processor.tokenizer.padding_side = "right" if self.mode == "train" else "left"
+        
         self.img_size = img_size
         
         self.transform = transform
@@ -221,6 +223,9 @@ class BaseDataset(Dataset):
         self.ans = None
         self.img = None
         
+    def change_mode(self, new_mode):
+        self.mode = new_mode
+        self.processor.tokenizer.padding_side = "right" if self.mode == "train" else "left"
         
     def preprocess(self):
         self.quest = self.data[self.index]["question"].strip()
