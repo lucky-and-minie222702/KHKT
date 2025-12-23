@@ -1,3 +1,4 @@
+from PIL import Image
 import torch
 from peft import LoraConfig, get_peft_model
 from transformers import AutoModel, AutoProcessor
@@ -220,7 +221,8 @@ class BaseDataset(Dataset):
         self.ans = None
         self.img = None
         
-    def process(self):
+        
+    def preprocess(self):
         self.quest = self.data[self.index]["question"].strip()
         self.quest = TextUtils.norm_text(
             self.quest,
@@ -238,12 +240,49 @@ class BaseDataset(Dataset):
         self.img = ImageUtils.change_size(self.img, self.img_size)
         if self.mode == "train":
             self.img = self.transform(self.img)
+            
+    def process(self, *args, **kwargs):
+        pass
+            
+    def external_process(self, img, quest, ans = None, preprocess_only = False):
+        quest = quest.strip()
+        quest = TextUtils.norm_text(
+            quest,
+            final_char = quest[-1] if quest[-1] in [".", "?"] else "?"
+        )
+
+        if ans is not None:
+            ans = ans.strip()    
+            ans = TextUtils.norm_text(
+                ans,
+                final_char = ".",
+            )
+
+        if isinstance(img, str):
+            img = Image.open(img).convert("RGB")
+        elif isinstance(img, np.ndarray):
+            img = Image.fromarray(img).convert("RGB")
+        else:
+            img = img
+            
+        img = ImageUtils.change_size(img, self.img_size)
+        if self.mode == "train":
+            img = self.transform(img)
+            
+        if preprocess_only:
+            return img, quest, ans
+        else:
+            self.img = img
+            self.quest = quest
+            self.ans = ans
+            return self.process()
         
     def __len__(self):
         return len(self.data)
         
     def __getitem__(self, index):
         self.index = index
+        self.preprocess()
         return self.process()
     
 class CausalDataset(BaseDataset):
@@ -265,7 +304,6 @@ class CausalDataset(BaseDataset):
         self.assistant_max_length = assistant_max_length
     
     def process(self):
-        super().process()
         inp_mes = [
             {
                 "role": "system",
@@ -292,7 +330,7 @@ class CausalDataset(BaseDataset):
         ]
         
         out_mes = []
-        if self.contain_label:
+        if self.contain_label and self.ans is not None:
             out_mes = [
                 {
                     "role": "assistant",
@@ -319,13 +357,16 @@ class CausalDataset(BaseDataset):
                 max_length = self.user_max_length,
                 return_tensors = "pt"
             )
-            inp["labels"] = self.processor.tokenizer(
-                text = self.ans,
-                padding = "max_length",
-                truncation = True,
-                max_length = self.assistant_max_length,
-                return_tensors = "pt"
-            ).input_ids
+            
+            if self.contain_label and self.ans is not None:
+                inp["labels"] = self.processor.tokenizer(
+                    text = self.ans,
+                    padding = "max_length",
+                    truncation = True,
+                    max_length = self.assistant_max_length,
+                    return_tensors = "pt"
+                ).input_ids
+
             inp = {k: v.squeeze(0) for k, v in inp.items()}
             return inp
         
